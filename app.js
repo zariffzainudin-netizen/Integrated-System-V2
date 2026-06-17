@@ -6566,6 +6566,94 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
     return false;
   }
 
+  const GREETINGS_LOGIN = [
+    "Semoga hari ini lebih cemerlang dari semalam!",
+    "Selamat kembali! Jom teruskan tugas.",
+    "Hari yang indah untuk memulakan kerja!",
+    "Bersemangat! Rekod hari ini menanti.",
+    "Semoga dipermudahkan segala urusan hari ini.",
+    "Hari baru, semangat baru! Jom!",
+    "Selamat bertugas! Beri yang terbaik.",
+    "Jangan lupa senyum, hari ini pasti hebat!",
+    "Bismillah, mulakan hari dengan positif.",
+    "Bertemu lagi! Sedia untuk cemerlang?",
+    "Semoga rezeki hari ini melimpah ruah!",
+    "Yang penting istiqamah, terus maju!",
+    "Berani mencuba, berani berjaya!",
+    "Kualiti kerja anda cerminan diri sendiri.",
+    "Setiap rekod yang diproses adalah amal jariah.",
+    "Rajin-rajinlah, hasilnya manis nanti.",
+    "Jangan tunggu sempurna, mula sahaja!",
+    "Hari ini lebih baik dari semalam.",
+    "Senyum! Banyak rekod nak diproses.",
+    "Selamat datang! Sistem bersedia membantu.",
+    "Ayuh! Jadikan hari ini produktif.",
+    "Fokus pada matlamat, bukan halangan.",
+    "Setiap titik peluh pasti berbaloi.",
+    "Mula dengan senyuman, tamat dengan kepuasan.",
+    "Anda hebat! Buktikan hari ini.",
+    "Hari yang cerah untuk bekerja!",
+    "Kunci kejayaan adalah disiplin.",
+    "Jangan putus asa, setiap usaha dihargai.",
+    "Lakukan yang terbaik, biar Tuhan uruskan yang lain.",
+    "Bersyukur kerana diberi peluang bekerja hari ini.",
+    "Positive vibes only! Jom kerja!"
+  ];
+
+  const GREETINGS_LOGOUT = [
+    "Selamat tinggal... sampai bertemu lagi.",
+    "Pergi pun berat, tapi apa nak buat...",
+    "Semoga perjalananmu dipermudahkan.",
+    "Selamat beristirahat, esok kita sambung.",
+    "Jangan rindu sangat kat sistem ni...",
+    "Semoga esok lebih baik dari hari ini.",
+    "Selamat berpisah, sampai jumpa lagi.",
+    "Hari sudah malam, sistem pun nak rehat.",
+    "Biarlah... esok kita kembali lagi.",
+    "Hari ini belum habis, tapi terpaksa pergi.",
+    "Semoga selamat sampai ke destinasi.",
+    "Jangan lupa solat, jaga diri.",
+    "Pergi dulu, tinggallah kenangan.",
+    "Sistem akan sunyi tanpa kehadiranmu.",
+    "Semoga dipermudahkan urusan di luar.",
+    "Selamat malam, esok kita sambung cerita.",
+    "Hari yang melelahkan, rehat yang sempurna.",
+    "Jangan terlalu lama, sistem rindu.",
+    "Pergi dengan senyuman, pulang dengan semangat baru.",
+    "Selamat tinggal... jangan lupa datang balik.",
+    "Rehatlah, esok kita sambung perjuangan.",
+    "Semoga Tuhan memberkati perjalananmu.",
+    "Terpaksa berpisah dulu, sampai bertemu!",
+    "Senyum-senyum je, padahal hati merana...",
+    "Da daa... jumpa lagi esok.",
+    "Jangan pergi... okay, pergi lah.",
+    "Letih? Rehatlah, esok kita sambung lagi.",
+    "Semoga mimpi indah, esok kita uruskan rekod lagi.",
+    "Pemergianmu buat sistem sunyi sepi...",
+    "Good luck untuk urusan di luar sana.",
+    "Sampai bila pun, pintu sistem sentiasa terbuka."
+  ];
+
+  function getDailyGreeting(type) {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), 0, 0);
+    const diff = now - start;
+    const dayOfYear = Math.floor(diff / 86400000);
+    const quotes = type === 'login' ? GREETINGS_LOGIN : GREETINGS_LOGOUT;
+    return quotes[dayOfYear % quotes.length];
+  }
+
+  function showLoginGreeting() {
+    const name = currentUser?.name || 'Pengguna';
+    setTimeout(() => {
+      CustomAppModal.alert(`${name}, ${getDailyGreeting('login')}`, 'Selamat Datang!', 'success');
+    }, 800);
+  }
+
+  function showLogoutGreeting() {
+    CustomAppModal.alert(getDailyGreeting('logout'), 'Selamat Tinggal...', 'info');
+  }
+
   function setupUserUI() {
     if (!currentUser || !appContainer || !userBadge) return;
 
@@ -6774,6 +6862,8 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
       })
       .catch(err => console.error("V6.5.2 Gagal muat turun senarai pengguna:", err));
     // ---------------------------------------------------------
+    
+    showLoginGreeting();
   }
 
   const SVG_ICONS = {
@@ -7858,13 +7948,16 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
       );
 
       if(isConfirmed) {
-        await storageWrapper.remove([
-          'stb_session', 'stb_form_data', 'stb_pelulus_state', 'stb_last_active_tab',
-          'stb_last_active_element', 'stb_form_states', 'stb_search_state',
-          // ... array pemadaman seperti asal ...
-          'stb_current_draft_filter', 'stb_music_playing', 'stb_bgm_volume', 'stb_sfx_volume'
-        ]);
-        location.reload();
+        showLogoutGreeting();
+        setTimeout(async () => {
+          await storageWrapper.remove([
+            'stb_session', 'stb_form_data', 'stb_pelulus_state', 'stb_last_active_tab',
+            'stb_last_active_element', 'stb_form_states', 'stb_search_state',
+            // ... array pemadaman seperti asal ...
+            'stb_current_draft_filter', 'stb_music_playing', 'stb_bgm_volume', 'stb_sfx_volume'
+          ]);
+          location.reload();
+        }, 1500);
       }
   }
 
