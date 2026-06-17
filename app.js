@@ -3075,9 +3075,9 @@ async function handleCredentialResponse(response) {
   // FUNGSI MUAT TURUN CSV
   // =========================================================================
   
-  function downloadAdminStatsCSV() {
+  async function downloadAdminStatsCSV() {
     if (!cachedData || cachedData.length === 0) {
-      alert("Tiada data untuk dimuat turun.");
+      await CustomAppModal.alert("Tiada data untuk dimuat turun.", "Tiada Data", "warning");
       return;
     }
     
@@ -3196,9 +3196,9 @@ async function handleCredentialResponse(response) {
     URL.revokeObjectURL(url);
   }
 
-  function downloadDashboardCSV() {
+  async function downloadDashboardCSV() {
     if (!cachedData || cachedData.length === 0) {
-      alert("Tiada data untuk dimuat turun.");
+      await CustomAppModal.alert("Tiada data untuk dimuat turun.", "Tiada Data", "warning");
       return;
     }
     
@@ -3370,7 +3370,7 @@ async function handleCredentialResponse(response) {
       pdfUploadArea.classList.remove('dragover');
     });
 
-    pdfUploadArea.addEventListener('drop', (e) => {
+    pdfUploadArea.addEventListener('drop', async (e) => {
       e.preventDefault();
       pdfUploadArea.classList.remove('dragover');
       
@@ -3384,7 +3384,7 @@ async function handleCredentialResponse(response) {
           pdfFileInput.dispatchEvent(new Event('change', { bubbles: true }));
           updateFileName(file.name);
         } else {
-          alert("Sila muat naik fail PDF sahaja.");
+          await CustomAppModal.alert("Sila muat naik fail PDF sahaja.", "Ralat Format", "warning");
         }
       }
     });
@@ -3465,7 +3465,7 @@ async function handleCredentialResponse(response) {
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.js';
       } else {
         console.error("V6.5.2 PDF.js library not loaded");
-        alert("PDF processing library tidak dimuatkan. Sila muat semula halaman.");
+        await CustomAppModal.alert("PDF processing library tidak dimuatkan. Sila muat semula halaman.", "Ralat Sistem", "error");
         return;
       }
 
@@ -3503,13 +3503,13 @@ async function handleCredentialResponse(response) {
 
   async function processPdfWithAI() {
     if (!pdfFileInput.files.length) {
-      alert("Sila pilih fail PDF terlebih dahulu.");
+      await CustomAppModal.alert("Sila pilih fail PDF terlebih dahulu.", "Fail Diperlukan", "warning");
       return;
     }
 
     const file = pdfFileInput.files[0];
     if (file.size > 10 * 1024 * 1024) {
-      alert("Fail terlalu besar (Maks 10MB).");
+      await CustomAppModal.alert("Fail terlalu besar (Maks 10MB).", "Ralat Saiz", "error");
       return;
     }
 
@@ -3612,7 +3612,7 @@ async function handleCredentialResponse(response) {
       await playErrorSound();
 
       document.getElementById('pdfProgressMsg').innerHTML = `<span style="color:#ef4444; font-weight:bold;">Ralat: ${error.message}</span>`;
-      alert("Gagal memproses: " + error.message);
+      await CustomAppModal.alert("Gagal memproses: " + error.message, "Ralat Sistem", "error");
     }
   }
 
@@ -4096,7 +4096,7 @@ async function handleCredentialResponse(response) {
       profilePdfUploadArea.classList.remove('dragover');
     });
 
-    profilePdfUploadArea.addEventListener('drop', (e) => {
+    profilePdfUploadArea.addEventListener('drop', async (e) => {
       e.preventDefault();
       profilePdfUploadArea.classList.remove('dragover');
       
@@ -4110,7 +4110,7 @@ async function handleCredentialResponse(response) {
           profilePdfInput.dispatchEvent(new Event('change', { bubbles: true }));
           updateProfileFileName(file.name);
         } else {
-          alert("Sila muat naik fail PDF sahaja.");
+          await CustomAppModal.alert("Sila muat naik fail PDF sahaja.", "Ralat Format", "warning");
         }
       }
     });
@@ -4251,13 +4251,13 @@ async function handleCredentialResponse(response) {
 
   async function processProfileWithAI() {
     if (!profilePdfInput.files.length) {
-      alert("Sila pilih fail PDF terlebih dahulu.");
+      await CustomAppModal.alert("Sila pilih fail PDF terlebih dahulu.", "Fail Diperlukan", "warning");
       return;
     }
 
     const file = profilePdfInput.files[0];
     if (file.size > 10 * 1024 * 1024) {
-      alert("Fail terlalu besar (Maks 10MB).");
+      await CustomAppModal.alert("Fail terlalu besar (Maks 10MB).", "Ralat Saiz", "error");
       return;
     }
 
@@ -4362,7 +4362,7 @@ async function handleCredentialResponse(response) {
       await playErrorSound();
       
       document.getElementById('profilePdfProgressMsg').innerHTML = `<span style="color:#ef4444; font-weight:bold;">Ralat: ${error.message}</span>`;
-      alert("Gagal memproses profile PDF: " + error.message);
+      await CustomAppModal.alert("Gagal memproses profile PDF: " + error.message, "Ralat Sistem", "error");
     }
   }
 
@@ -4525,9 +4525,9 @@ async function handleCredentialResponse(response) {
     profilePdfExtractedData.innerHTML = html;
   }
 
-  function applyProfileDataToForm() {
+  async function applyProfileDataToForm() {
     if (!extractedProfileData) {
-      alert("Tiada data profile untuk digunakan.");
+      await CustomAppModal.alert("Tiada data profile untuk digunakan.", "Tiada Data", "warning");
       return;
     }
 
@@ -4616,7 +4616,7 @@ async function handleCredentialResponse(response) {
       profileWeb.value = extractedProfileData.webAddress;
     }
 
-    alert("Data profile berjaya diisi ke borang!");
+    await CustomAppModal.alert("Data profile berjaya diisi ke borang!", "Berjaya", "success");
   }
 
   function clearProfileData() {
@@ -4646,7 +4646,7 @@ async function handleCredentialResponse(response) {
   if (btnCetakProfile) {
     btnCetakProfile.addEventListener('click', async () => {
       if (!profileSyarikat.value.trim()) {
-        alert("Sila isi Nama Syarikat terlebih dahulu sebelum mencetak.");
+        await CustomAppModal.alert("Sila isi Nama Syarikat terlebih dahulu sebelum mencetak.", "Maklumat Tidak Lengkap", "warning");
         return;
       }
 
@@ -5832,11 +5832,11 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
     });
   }
 
-  function openDriveFolder() {
+  async function openDriveFolder() {
     const dbPautan = document.getElementById('db_pautan')?.value;
     
     if (!dbPautan || dbPautan.trim() === '') {
-      alert("Tiada pautan folder Drive. Sila cipta folder terlebih dahulu.");
+      await CustomAppModal.alert("Tiada pautan folder Drive. Sila cipta folder terlebih dahulu.", "Pautan Diperlukan", "warning");
       return;
     }
     
@@ -5848,11 +5848,11 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
   }
 
   if (btnOpenMyDriveFolder) {
-    btnOpenMyDriveFolder.addEventListener('click', () => {
+    btnOpenMyDriveFolder.addEventListener('click', async () => {
       if (userFolderUrl) {
         window.open(userFolderUrl, '_blank');
       } else {
-        alert("Folder user anda belum dicipta. Sila cipta folder untuk syarikat ini terlebih dahulu.");
+        await CustomAppModal.alert("Folder user anda belum dicipta. Sila cipta folder untuk syarikat ini terlebih dahulu.", "Folder Tidak Wujud", "warning");
       }
     });
   }
@@ -7037,7 +7037,7 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
       switchTab(activeTab);
       
     } else {
-      alert("Role pengguna tidak dikenali.");
+      await CustomAppModal.alert("Role pengguna tidak dikenali.", "Ralat", "error");
     }
 
     // --- KOD BARU (a): Masukkan elemen slider ke dalam container ---
@@ -7710,7 +7710,7 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
             formData[el.id] = el.value.toUpperCase();
           }
         } else {
-          formData[el.id] = el.type === 'checkbox' ? el.checked : el.value;
+          await CustomAppModal.alert("Sila muat naik fail PDF sahaja.", "Ralat Format", "warning");
         }
       }
     });
@@ -9390,7 +9390,7 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
           if(callback) callback(result);
         }, 500);
       })
-      .catch(err => { 
+      .catch(async (err) => { 
         clearTimeout(timeoutId);
         clearInterval(progressInterval);
         console.error("V6.5.2 Submit error:", err);
@@ -9413,9 +9413,8 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
           if (loadingOverlay) {
             loadingOverlay.style.display = 'none';
           }
-          alert("GAGAL menghantar data: " + errorMsg);
         }, 1000);
-      });
+        await CustomAppModal.alert("GAGAL menghantar data: " + errorMsg, "Ralat", "error");
     } else {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000);
@@ -9449,7 +9448,7 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
         }
         if(callback) callback(result);
       })
-      .catch(err => { 
+      .catch(async (err) => { 
         clearTimeout(timeoutId);
         console.error("V6.5.2 Submit error:", err);
         
@@ -9461,7 +9460,7 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
         }
         
         if(statusEl) statusEl.innerText = errorMsg; 
-        alert("GAGAL menghantar data: " + errorMsg);
+        await CustomAppModal.alert("GAGAL menghantar data: " + errorMsg, "Ralat", "error");
       });
     }
   }
@@ -10446,8 +10445,9 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
 
               // 2. Fungsi Buang Personel
               const delBtn = div.querySelector('.qc-btn-delete');
-              delBtn.addEventListener('click', () => {
-                  if (confirm("Adakah anda pasti mahu membuang personel ini?")) {
+              delBtn.addEventListener('click', async () => {
+                  const confirmed = await CustomAppModal.confirm("Adakah anda pasti mahu membuang personel ini?", "Buang Personel", "warning", "Ya, Buang", true);
+                  if (confirmed) {
                       card.remove(); // Buang kotak di borang asal
                       saveFormData();
                       openQuickCheckModal(); // Refresh modal
@@ -10691,13 +10691,13 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
       return dateStr;
   }
 
-  document.addEventListener('change', (e) => {
+  document.addEventListener('change', async (e) => {
       // UPLOAD EXCEL
       if (e.target.id === 'excelFileInput') {
           
           // KEMASKINI 1: Sekat upload jika data tapisan (rules) belum siap di-load dari Firebase
           if (currentUser && currentUser.role === 'PENGESYOR' && !firebaseUserRules) {
-              alert("⏳ Sistem sedang mendapatkan peraturan tapisan peribadi anda. Sila tunggu 2-3 saat dan klik 'Pilih Fail Excel' sekali lagi.");
+              await CustomAppModal.alert("⏳ Sistem sedang mendapatkan peraturan tapisan peribadi anda. Sila tunggu 2-3 saat dan klik 'Pilih Fail Excel' sekali lagi.", "Sila Tunggu", "info");
               e.target.value = ''; 
               return;
           }
@@ -10711,14 +10711,14 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
           simulateLoadingWithSteps(['Membaca fail Excel...', 'Menapis data berdasarkan ketetapan anda...'], 'Sila Tunggu');
           
           const reader = new FileReader();
-          reader.onload = (evt) => {
+          reader.onload = async (evt) => {
               try {
                   const data = new Uint8Array(evt.target.result);
                   const workbook = XLSX.read(data, { type: 'array' });
                   const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1 });
                   processExcelForTapisan(jsonData);
               } catch (error) {
-                  alert("Ralat membaca fail Excel. Pastikan ia format .xlsx yang betul.");
+                  await CustomAppModal.alert("Ralat membaca fail Excel. Pastikan ia format .xlsx yang betul.", "Ralat Excel", "error");
               } finally {
                   hideLoading();
                   e.target.value = ''; 
