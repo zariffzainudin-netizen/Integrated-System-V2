@@ -103,9 +103,10 @@
         }
 
         [data-theme="dark"] .desktop-menu-btn {
-            background: rgba(30,41,59,0.9);
-            border-color: var(--border);
-            color: var(--text-primary);
+            background: #1e293b;
+            border-color: #475569;
+            color: #f8fafc;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
         }
 
         /* ========== DARK MODE: Content & Cards ========== */
