@@ -750,6 +750,35 @@
         [data-theme="dark"] #historyList div[style*="color: #777"] {
             color: var(--text-muted) !important;
         }
+
+        /* ========== DARK MODE: Queue SPI modal ========== */
+        [data-theme="dark"] #queueSpiModal h2 {
+            color: var(--text-primary) !important;
+            border-bottom-color: var(--border) !important;
+        }
+        [data-theme="dark"] #queueSpiModal h3[style*="color: #3b82f6"],
+        [data-theme="dark"] #queueSpiModal h3[style*="color:#3b82f6"] {
+            color: #60a5fa !important;
+        }
+        [data-theme="dark"] #queueSpiModal h3[style*="color: #e74c3c"],
+        [data-theme="dark"] #queueSpiModal h3[style*="color:#e74c3c"] {
+            color: #f87171 !important;
+        }
+        [data-theme="dark"] #queueSpiModal div[style*="background: white"] {
+            background: var(--bg-card) !important;
+            border-color: var(--border) !important;
+        }
+        [data-theme="dark"] #queueSpiModal thead[style*="background: #f8afc"] {
+            background: var(--bg-page) !important;
+        }
+        [data-theme="dark"] #queueSpiModal thead {
+            background: var(--bg-page) !important;
+        }
+        [data-theme="dark"] .queue-loading-bar {
+            background: linear-gradient(90deg, var(--theme-color), var(--theme-light)) !important;
+        }
+
+        .app-layout {
             display: flex;
             min-height: 100vh;
         }
@@ -1043,6 +1072,11 @@
 
         .sidebar-unpinned #app-container {
             padding-left: 0;
+        }
+
+        .sidebar-unpinned .main-content {
+            margin-left: 0;
+            max-width: 100%;
         }
 
         .sidebar-unpinned .btn-top-fullview {

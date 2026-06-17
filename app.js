@@ -2024,38 +2024,62 @@ async function handleCredentialResponse(response) {
       }
     });
     
+    // Kira kumulatif untuk ogif
+    let cumSupported = 0, cumNotSupported = 0;
+    const cumulativeSupported = monthlyLabels.map(key => { cumSupported += monthlyData[key]?.supported || 0; return cumSupported; });
+    const cumulativeNotSupported = monthlyLabels.map(key => { cumNotSupported += monthlyData[key]?.notSupported || 0; return cumNotSupported; });
+    const cumulativeTotal = monthlyLabels.map((_, i) => cumulativeSupported[i] + cumulativeNotSupported[i]);
+    
     recommenderMonthlyChart = new Chart(monthlyCtx, {
-      type: 'bar',
+      type: 'line',
       data: {
         labels: monthlyLabels.map(key => monthlyData[key]?.label || key),
         datasets: [
           {
-            label: 'SOKONG',
-            data: monthlyLabels.map(key => monthlyData[key]?.supported || 0),
-            backgroundColor: '#10b981',
-            borderRadius: 6,        /* KOD BARU */
-            borderSkipped: false
+            label: 'Kumulatif SOKONG',
+            data: cumulativeSupported,
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16,185,129,0.1)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 4,
+            pointBackgroundColor: '#10b981',
           },
           {
-            label: 'TIDAK DISOKONG',
-            data: monthlyLabels.map(key => monthlyData[key]?.notSupported || 0),
-            backgroundColor: '#ef4444',
-            borderRadius: 6,        /* KOD BARU */
-            borderSkipped: false
+            label: 'Kumulatif TIDAK DISOKONG',
+            data: cumulativeNotSupported,
+            borderColor: '#ef4444',
+            backgroundColor: 'rgba(239,68,68,0.1)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 4,
+            pointBackgroundColor: '#ef4444',
           }
         ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        animation: { duration: 1500, easing: 'easeOutQuart' }, /* KOD BARU */
+        animation: { duration: 1500, easing: 'easeOutQuart' },
         scales: {
-          y: { beginAtZero: true, title: { display: true, text: 'Bilangan Syor' }, ticks: { stepSize: 1 }, border: { display: false } },
+          y: { beginAtZero: true, title: { display: true, text: 'Kumulatif' }, ticks: { stepSize: 1 }, border: { display: false } },
           x: { title: { display: true, text: 'Bulan' }, grid: { display: false }, border: { display: false } }
         },
         plugins: {
           legend: { position: 'top' },
-          title: { display: true, text: 'Trend Syor Bulanan' }
+          title: { display: true, text: 'Trend Syor Bulanan (Ogif)' },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const i = context.dataIndex;
+                const rawSupported = monthlyLabels.map(k => monthlyData[k]?.supported || 0);
+                const rawNotSupported = monthlyLabels.map(k => monthlyData[k]?.notSupported || 0);
+                if (context.datasetIndex === 0) return `Kumulatif SOKONG: ${context.raw} (Bulan ini: ${rawSupported[i]})`;
+                if (context.datasetIndex === 1) return `Kumulatif TIDAK DISOKONG: ${context.raw} (Bulan ini: ${rawNotSupported[i]})`;
+                return context.raw;
+              }
+            }
+          }
         }
       }
     });
@@ -2095,38 +2119,61 @@ async function handleCredentialResponse(response) {
       }
     });
     
+    // Kira kumulatif untuk ogif
+    let cumApproved = 0, cumRejected = 0;
+    const cumulativeApproved = monthlyLabels.map(key => { cumApproved += monthlyData[key]?.approved || 0; return cumApproved; });
+    const cumulativeRejected = monthlyLabels.map(key => { cumRejected += monthlyData[key]?.rejected || 0; return cumRejected; });
+    
     approverMonthlyChart = new Chart(monthlyCtx, {
-      type: 'bar',
+      type: 'line',
       data: {
         labels: monthlyLabels.map(key => monthlyData[key]?.label || key),
         datasets: [
           {
-            label: 'DILULUSKAN',
-            data: monthlyLabels.map(key => monthlyData[key]?.approved || 0),
-            backgroundColor: '#10b981',
-            borderRadius: 6,        /* KOD BARU */
-            borderSkipped: false
+            label: 'Kumulatif DILULUSKAN',
+            data: cumulativeApproved,
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16,185,129,0.1)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 4,
+            pointBackgroundColor: '#10b981',
           },
           {
-            label: 'DITOLAK/SIASAT',
-            data: monthlyLabels.map(key => monthlyData[key]?.rejected || 0),
-            backgroundColor: '#ef4444',
-            borderRadius: 6,        /* KOD BARU */
-            borderSkipped: false
+            label: 'Kumulatif DITOLAK/SIASAT',
+            data: cumulativeRejected,
+            borderColor: '#ef4444',
+            backgroundColor: 'rgba(239,68,68,0.1)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 4,
+            pointBackgroundColor: '#ef4444',
           }
         ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        animation: { duration: 1500, easing: 'easeOutQuart' }, /* KOD BARU */
+        animation: { duration: 1500, easing: 'easeOutQuart' },
         scales: {
-          y: { beginAtZero: true, title: { display: true, text: 'Bilangan Permohonan' }, ticks: { stepSize: 1 }, border: { display: false } },
+          y: { beginAtZero: true, title: { display: true, text: 'Kumulatif' }, ticks: { stepSize: 1 }, border: { display: false } },
           x: { title: { display: true, text: 'Bulan' }, grid: { display: false }, border: { display: false } }
         },
         plugins: {
           legend: { position: 'top' },
-          title: { display: true, text: 'Trend Kelulusan Bulanan' }
+          title: { display: true, text: 'Trend Kelulusan Bulanan (Ogif)' },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const i = context.dataIndex;
+                const rawApproved = monthlyLabels.map(k => monthlyData[k]?.approved || 0);
+                const rawRejected = monthlyLabels.map(k => monthlyData[k]?.rejected || 0);
+                if (context.datasetIndex === 0) return `Kumulatif DILULUSKAN: ${context.raw} (Bulan ini: ${rawApproved[i]})`;
+                if (context.datasetIndex === 1) return `Kumulatif DITOLAK/SIASAT: ${context.raw} (Bulan ini: ${rawRejected[i]})`;
+                return context.raw;
+              }
+            }
+          }
         }
       }
     });
@@ -11102,7 +11149,7 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
                   <td colspan="6" style="text-align:center; padding: 40px 20px;">
                       <div style="display:flex; flex-direction:column; align-items:center; gap:15px;">
                           <div class="dashboard-spinner" style="margin-bottom:0;"></div>
-                          <div class="queue-loading-text" style="font-weight:bold; color:#1e40af; font-size:1rem;">Menyambung ke pelayan... 0%</div>
+                          <div class="queue-loading-text" style="font-weight:bold; color: var(--text-primary); font-size:1rem;">Menyambung ke pelayan... 0%</div>
                           <div style="width: 80%; max-width: 300px; height: 10px; background: #e2e8f0; border-radius: 5px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
                               <div class="queue-loading-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #2563eb, #3b82f6); transition: width 0.3s ease-out;"></div>
                           </div>
