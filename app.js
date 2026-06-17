@@ -6446,11 +6446,11 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
     
     // --- KOD BARU: Update sidebar user info ---
     const sidebarUserName = document.getElementById('sidebarUserName');
-    const sidebarUserRole = document.getElementById('sidebarUserRole');
+    const sidebarUserEmail = document.getElementById('sidebarUserEmail');
     const sidebarUserAvatar = document.querySelector('.sidebar-user-avatar');
     const sidebarUser = document.getElementById('sidebarUser');
     if (sidebarUserName) sidebarUserName.textContent = currentUser.name;
-    if (sidebarUserRole) sidebarUserRole.textContent = currentUser.role;
+    if (sidebarUserEmail) sidebarUserEmail.textContent = currentUser.email;
     if (sidebarUserAvatar) sidebarUserAvatar.innerHTML = SVG_ICONS.profile;
     if (sidebarUser) {
         sidebarUser.style.cursor = 'pointer';
@@ -6476,7 +6476,23 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
         const b = parseInt(hex.slice(5,7), 16);
         return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
+    function lightenColor(hex, percent) {
+        const r = parseInt(hex.slice(1,3), 16);
+        const g = parseInt(hex.slice(3,5), 16);
+        const b = parseInt(hex.slice(5,7), 16);
+        return `rgb(${Math.min(255, Math.round(r + (255 - r) * percent / 100))},${Math.min(255, Math.round(g + (255 - g) * percent / 100))},${Math.min(255, Math.round(b + (255 - b) * percent / 100))})`;
+    }
+    function darkenColor(hex, percent) {
+        const r = parseInt(hex.slice(1,3), 16);
+        const g = parseInt(hex.slice(3,5), 16);
+        const b = parseInt(hex.slice(5,7), 16);
+        return `rgb(${Math.round(r * (100 - percent) / 100)},${Math.round(g * (100 - percent) / 100)},${Math.round(b * (100 - percent) / 100)})`;
+    }
     document.documentElement.style.setProperty('--sidebar-bg', hexToRgba(themeColor, 0.04));
+    document.documentElement.style.setProperty('--gradient-1', lightenColor(themeColor, 40));
+    document.documentElement.style.setProperty('--gradient-2', hexToRgba(themeColor, 0.6));
+    document.documentElement.style.setProperty('--gradient-3', darkenColor(themeColor, 10));
+    document.documentElement.style.setProperty('--gradient-4', darkenColor(themeColor, 30));
     
     // Inisialkan aplikasi berdasarkan peranan
     if (!isAppReady) {

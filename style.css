@@ -4,6 +4,11 @@
             --theme-dark: #1d4ed8;
             --theme-bg: #eff6ff;
             
+            --gradient-1: #93c5fd;
+            --gradient-2: rgba(37,99,235,0.6);
+            --gradient-3: #1d4ed8;
+            --gradient-4: #1e3a5f;
+            
             --glass-bg: rgba(255, 255, 255, 0.96);
             --glass-border: 1px solid rgba(255, 255, 255, 0.7);
             
@@ -153,30 +158,23 @@
             font-weight: 500;
         }
 
-        /* SIDEBAR FOOTER - ALWAYS VISIBLE */
-        .sidebar-footer {
-            padding: var(--space-sm) var(--space-md);
-            border-top: 1px solid var(--border);
-            flex-shrink: 0;
-        }
-
+        /* USER INFO AT TOP */
         .sidebar-user {
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 6px 8px;
-            border-radius: var(--radius-md);
+            padding: 12px var(--space-md) 0;
             cursor: pointer;
             transition: background 0.15s;
         }
 
         .sidebar-user:hover {
-            background: #f8fafc;
+            background: transparent;
         }
 
         .sidebar-user-avatar {
-            width: 30px;
-            height: 30px;
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
             background: var(--theme-bg);
             display: flex;
@@ -187,8 +185,8 @@
         }
 
         .sidebar-user-avatar svg {
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
             display: block;
         }
 
@@ -198,7 +196,7 @@
         }
 
         .sidebar-user-name {
-            font-size: 0.78rem;
+            font-size: 0.8rem;
             font-weight: 600;
             color: var(--text-primary);
             overflow: hidden;
@@ -206,33 +204,44 @@
             white-space: nowrap;
         }
 
-        .sidebar-user-role {
+        .sidebar-user-email {
             font-size: 0.6rem;
             color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* SIDEBAR FOOTER - ONLY RED LOGOUT */
+        .sidebar-footer {
+            padding: var(--space-sm) var(--space-md);
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+            display: flex;
+            justify-content: center;
         }
 
         .sidebar-user-logout {
-            width: 26px;
-            height: 26px;
-            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 10px 16px;
+            border-radius: var(--radius-md);
             border: 1px solid var(--border);
             background: transparent;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-muted);
-            font-size: 0.75rem;
+            color: #dc2626;
+            font-size: 0.85rem;
+            font-weight: 600;
             transition: all 0.15s;
-            flex-shrink: 0;
+            justify-content: center;
         }
 
         .sidebar-user-logout:hover {
             background: #fef2f2;
-            border-color: #fecaca;
-            color: var(--danger-color);
+            border-color: #fca5a5;
+            color: #b91c1c;
         }
 
         /* Tab slider for legacy support */
@@ -253,9 +262,9 @@
             box-sizing: border-box;
         }
 
-        /* Animated gradient for main content area */
+        /* Animated gradient for main content area (per-user theme color) */
         .main-content {
-            background: linear-gradient(-45deg, #10b981, #facc15, #3b82f6, #2563eb);
+            background: linear-gradient(-45deg, var(--gradient-1), var(--gradient-2), var(--gradient-3), var(--gradient-4));
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
             min-height: 100vh;
