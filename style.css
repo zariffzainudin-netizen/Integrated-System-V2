@@ -56,8 +56,8 @@
         }
         
         [data-theme="dark"] .app-sidebar {
-            background: var(--sidebar-bg);
-            border-right-color: var(--border);
+            background: #1e293b;
+            border-right-color: #334155;
         }
         
         [data-theme="dark"] .tab-btn:hover {
