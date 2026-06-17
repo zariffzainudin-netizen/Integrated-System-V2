@@ -1112,12 +1112,14 @@
         }
 
         .sidebar-unpinned #app-container {
-            padding-left: 0;
+            padding-left: 0 !important;
+            padding-top: 0 !important;
         }
 
         .sidebar-unpinned .main-content {
             margin-left: 0;
             max-width: 100%;
+            padding: 0;
         }
 
         .sidebar-unpinned .btn-top-fullview {
