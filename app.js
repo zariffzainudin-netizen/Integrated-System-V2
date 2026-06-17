@@ -6448,9 +6448,21 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
     const sidebarUserName = document.getElementById('sidebarUserName');
     const sidebarUserRole = document.getElementById('sidebarUserRole');
     const sidebarUserAvatar = document.querySelector('.sidebar-user-avatar');
+    const sidebarUser = document.getElementById('sidebarUser');
     if (sidebarUserName) sidebarUserName.textContent = currentUser.name;
     if (sidebarUserRole) sidebarUserRole.textContent = currentUser.role;
-    if (sidebarUserAvatar) sidebarUserAvatar.textContent = `👤`;
+    if (sidebarUserAvatar) sidebarUserAvatar.innerHTML = SVG_ICONS.profile;
+    if (sidebarUser) {
+        sidebarUser.style.cursor = 'pointer';
+        sidebarUser.title = 'Buka Portal YouTube';
+        sidebarUser.onclick = function(e) {
+            if (e.target.closest('.sidebar-user-logout')) return;
+            if (lastActiveTab !== 'youtube') {
+                window.tabSebelumYoutube = lastActiveTab;
+            }
+            switchTab('youtube');
+        };
+    }
     
     let themeColor = getUserColorHex(currentUser.color);
     
@@ -6483,6 +6495,23 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
       .catch(err => console.error("V6.5.2 Gagal muat turun senarai pengguna:", err));
     // ---------------------------------------------------------
   }
+
+  const SVG_ICONS = {
+    dashboard: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>',
+    'tab-tapisan': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>',
+    'tab-bakul': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>',
+    stb: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 11 17 15 13"/></svg>',
+    db: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>',
+    drafts: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>',
+    submitted: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+    inbox: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>',
+    'pelulus-view': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+    'pelulus-action': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+    history: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+    'admin-dashboard': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+    youtube: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>',
+    profile: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'
+  };
 
   async function initAppBasedOnRole() {
     if (!tabsContainer) return;
@@ -6544,13 +6573,13 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
     
     if (currentUser.role === 'PENGESYOR') {
       tabsContainer.innerHTML = `
-        <button class="tab-btn" data-target="dashboard"><span class="tab-icon">📊</span><span class="tab-text">Dashboard</span></button>
-        <button class="tab-btn" data-target="tab-tapisan"><span class="tab-icon">📄</span><span class="tab-text">Tapisan Excel</span></button>
-        <button class="tab-btn" data-target="tab-bakul"><span class="tab-icon">🛒</span><span class="tab-text">Bakul Permohonan</span></button>
-        <button class="tab-btn" data-target="stb"><span class="tab-icon">✓</span><span class="tab-text">Borang Semakan</span></button>
-        <button class="tab-btn" data-target="db"><span class="tab-icon">📂</span><span class="tab-text">Input Database</span></button>
-        <button class="tab-btn" data-target="drafts"><span class="tab-icon">📋</span><span class="tab-text">Belum Hantar</span></button>
-        <button class="tab-btn" data-target="submitted"><span class="tab-icon">✅</span><span class="tab-text">Telah Disyor</span></button>
+        <button class="tab-btn" data-target="dashboard"><span class="tab-icon">${SVG_ICONS.dashboard}</span><span class="tab-text">Dashboard</span></button>
+        <button class="tab-btn" data-target="tab-tapisan"><span class="tab-icon">${SVG_ICONS['tab-tapisan']}</span><span class="tab-text">Tapisan Excel</span></button>
+        <button class="tab-btn" data-target="tab-bakul"><span class="tab-icon">${SVG_ICONS['tab-bakul']}</span><span class="tab-text">Bakul Permohonan</span></button>
+        <button class="tab-btn" data-target="stb"><span class="tab-icon">${SVG_ICONS.stb}</span><span class="tab-text">Borang Semakan</span></button>
+        <button class="tab-btn" data-target="db"><span class="tab-icon">${SVG_ICONS.db}</span><span class="tab-text">Input Database</span></button>
+        <button class="tab-btn" data-target="drafts"><span class="tab-icon">${SVG_ICONS.drafts}</span><span class="tab-text">Belum Hantar</span></button>
+        <button class="tab-btn" data-target="submitted"><span class="tab-icon">${SVG_ICONS.submitted}</span><span class="tab-text">Telah Disyor</span></button>
       `;
       
       const nameField = document.getElementById('db_pengesyor');
@@ -6568,11 +6597,11 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
 
     } else if (currentUser.role === 'PELULUS') {
       tabsContainer.innerHTML = `
-        <button class="tab-btn" data-target="dashboard"><span class="tab-icon">📊</span><span class="tab-text">Dashboard</span></button>
-        <button class="tab-btn" data-target="inbox"><span class="tab-icon">📥</span><span class="tab-text">1. Inbox</span></button>
-        <button class="tab-btn" data-target="pelulus-view"><span class="tab-icon">🔍</span><span class="tab-text">2. Semakan</span></button>
-        <button class="tab-btn" data-target="pelulus-action"><span class="tab-icon">⚖️</span><span class="tab-text">3. Keputusan</span></button>
-        <button class="tab-btn" data-target="history"><span class="tab-icon">📜</span><span class="tab-text">4. Sejarah</span></button>
+        <button class="tab-btn" data-target="dashboard"><span class="tab-icon">${SVG_ICONS.dashboard}</span><span class="tab-text">Dashboard</span></button>
+        <button class="tab-btn" data-target="inbox"><span class="tab-icon">${SVG_ICONS.inbox}</span><span class="tab-text">1. Inbox</span></button>
+        <button class="tab-btn" data-target="pelulus-view"><span class="tab-icon">${SVG_ICONS['pelulus-view']}</span><span class="tab-text">2. Semakan</span></button>
+        <button class="tab-btn" data-target="pelulus-action"><span class="tab-icon">${SVG_ICONS['pelulus-action']}</span><span class="tab-text">3. Keputusan</span></button>
+        <button class="tab-btn" data-target="history"><span class="tab-icon">${SVG_ICONS.history}</span><span class="tab-text">4. Sejarah</span></button>
       `;
       
       const pelulusNamaField = document.getElementById('pelulus_nama');
@@ -6596,7 +6625,7 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
       
     } else if (currentUser.role === 'ADMIN') {
       tabsContainer.innerHTML = `
-        <button class="tab-btn" data-target="admin-dashboard"><span class="tab-icon">👑</span><span class="tab-text">Admin Dashboard</span></button>
+        <button class="tab-btn" data-target="admin-dashboard"><span class="tab-icon">${SVG_ICONS['admin-dashboard']}</span><span class="tab-text">Admin Dashboard</span></button>
       `;
       
       const nameField = document.getElementById('db_pengesyor');
@@ -6616,10 +6645,10 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
       
     } else if (currentUser.role === 'PENGARAH' || currentUser.role === 'KETUA SEKSYEN') {
       tabsContainer.innerHTML = `
-        <button class="tab-btn" data-target="admin-dashboard"><span class="tab-icon">👑</span><span class="tab-text">Admin Dashboard</span></button>
-        <button class="tab-btn" data-target="inbox"><span class="tab-icon">📥</span><span class="tab-text">Belum Syor</span></button>
-        <button class="tab-btn" data-target="submitted"><span class="tab-icon">✅</span><span class="tab-text">Telah Syor</span></button>
-        <button class="tab-btn" data-target="history"><span class="tab-icon">📜</span><span class="tab-text">Sejarah</span></button>
+        <button class="tab-btn" data-target="admin-dashboard"><span class="tab-icon">${SVG_ICONS['admin-dashboard']}</span><span class="tab-text">Admin Dashboard</span></button>
+        <button class="tab-btn" data-target="inbox"><span class="tab-icon">${SVG_ICONS.inbox}</span><span class="tab-text">Belum Syor</span></button>
+        <button class="tab-btn" data-target="submitted"><span class="tab-icon">${SVG_ICONS.submitted}</span><span class="tab-text">Telah Syor</span></button>
+        <button class="tab-btn" data-target="history"><span class="tab-icon">${SVG_ICONS.history}</span><span class="tab-text">Sejarah</span></button>
       `;
       
       const nameField = document.getElementById('db_pengesyor');
