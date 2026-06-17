@@ -2087,8 +2087,8 @@ async function handleCredentialResponse(response) {
       else if (periodKey === 'day') key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
       if (!groups[key]) groups[key] = { key, date: d, positive: 0, negative: 0 };
       if (trendIsRecommender) {
-        if (item.syor_status && item.syor_status.includes('SOKONG')) groups[key].positive++;
-        else if (item.syor_status && item.syor_status.includes('TIDAK DISOKONG')) groups[key].negative++;
+        if (item.syor_status && item.syor_status === 'TIDAK DISOKONG') groups[key].negative++;
+        else if (item.syor_status && item.syor_status === 'SOKONG') groups[key].positive++;
       } else {
         if (item.kelulusan && item.kelulusan.includes('LULUS')) groups[key].positive++;
         else if (item.kelulusan && (item.kelulusan.includes('TOLAK') || item.kelulusan.includes('SIASAT'))) groups[key].negative++;
