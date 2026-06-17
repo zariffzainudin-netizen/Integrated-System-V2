@@ -6541,6 +6541,20 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
     document.documentElement.style.setProperty('--gradient-3', darkenColor(themeColor, 10));
     document.documentElement.style.setProperty('--gradient-4', darkenColor(themeColor, 30));
     
+    // --- KOD BARU: Clock sidebar ---
+    function updateSidebarClock() {
+        const dateEl = document.querySelector('.sidebar-clock .clock-date');
+        const timeEl = document.querySelector('.sidebar-clock .clock-time');
+        if (!dateEl && !timeEl) return;
+        const now = new Date();
+        const days = ['Ahad', 'Isnin', 'Selasa', 'Rabu', 'Khamis', 'Jumaat', 'Sabtu'];
+        const months = ['Januari', 'Februari', 'Mac', 'April', 'Mei', 'Jun', 'Julai', 'Ogos', 'September', 'Oktober', 'November', 'Disember'];
+        if (dateEl) dateEl.textContent = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+        if (timeEl) timeEl.textContent = now.toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+    updateSidebarClock();
+    setInterval(updateSidebarClock, 1000);
+    
     // --- KOD BARU: Inisialisasi toggle sidebar & dark mode ---
     function initToggles() {
         const toggleDark = document.getElementById('toggleDarkMode');

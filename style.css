@@ -839,26 +839,21 @@
         }
 
         .sidebar-logo-icon {
-            width: 30px;
-            height: 30px;
-            background: var(--theme-color);
-            border-radius: var(--radius-md);
+            width: 36px;
+            height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 0.95rem;
-            font-weight: 700;
             flex-shrink: 0;
         }
-
+        
         .sidebar-jata {
             width: 100%;
             height: 100%;
             object-fit: contain;
             display: block;
         }
-
+        
         .sidebar-subtitle {
             font-size: 0.6rem;
             color: var(--text-muted);
@@ -866,6 +861,22 @@
             letter-spacing: 0.3px;
             padding-left: 40px;
             margin-top: 1px;
+        }
+
+        .sidebar-clock {
+            padding: 6px var(--space-md) 10px;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+        .sidebar-clock .clock-date {
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .sidebar-clock .clock-time {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-primary);
         }
 
         .sidebar-divider {
