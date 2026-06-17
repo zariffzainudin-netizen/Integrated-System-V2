@@ -7710,7 +7710,7 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
             formData[el.id] = el.value.toUpperCase();
           }
         } else {
-          await CustomAppModal.alert("Sila muat naik fail PDF sahaja.", "Ralat Format", "warning");
+          formData[el.id] = el.type === 'checkbox' ? el.checked : el.value;
         }
       }
     });
