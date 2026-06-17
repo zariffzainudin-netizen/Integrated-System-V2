@@ -10828,12 +10828,12 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
       const container = document.getElementById('districtGrid');
       if(!container) return;
       container.innerHTML = '';
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
       
       allExcelDistricts.forEach(d => {
           const isActive = selectedExcelDistricts.has(d);
           const btn = document.createElement('button');
           
-          // KEMASKINI 1: Besarkan sikit saiz butang (padding dan font-size)
           btn.style.padding = '10px 20px'; 
           btn.style.borderRadius = '8px';
           btn.style.fontWeight = 'bold';
@@ -10843,24 +10843,22 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
           btn.style.transition = 'all 0.2s ease';
           
           if(isActive) {
-              // KEMASKINI 2: Gunakan warna tema pengesyor (--theme-color) berbanding warna oren tetap
               btn.style.backgroundColor = 'var(--theme-color)';
               btn.style.color = 'white';
-              btn.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'; // Timbul sikit bila aktif
+              btn.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
           } else {
-              btn.style.backgroundColor = '#e2e8f0';
-              btn.style.color = '#475569';
+              btn.style.backgroundColor = isDark ? '#334155' : '#e2e8f0';
+              btn.style.color = isDark ? '#e2e8f0' : '#475569';
               btn.style.boxShadow = 'none';
           }
           
           btn.innerText = d;
           
-          // Efek hover supaya nampak lebih interaktif
           btn.onmouseover = () => {
-              if (!isActive) btn.style.backgroundColor = '#cbd5e1';
+              if (!isActive) btn.style.backgroundColor = isDark ? '#475569' : '#cbd5e1';
           };
           btn.onmouseout = () => {
-              if (!isActive) btn.style.backgroundColor = '#e2e8f0';
+              if (!isActive) btn.style.backgroundColor = isDark ? '#334155' : '#e2e8f0';
           };
 
           btn.onclick = () => {
@@ -10985,7 +10983,7 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
               <td style="font-weight:bold; color: #f59e0b;">${item.grade}</td>
               <td><span style="font-weight:600; color:#475569;">${item.dateSubmitted}</span></td>
               <td>
-                <span style="background: rgba(255,255,255,0.7); color: #333; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; border: 1px solid #cbd5e1;">${item.updateType}</span>
+                <span style="background: rgba(255,255,255,0.7); color: #333; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; border: 1px solid #cbd5e1;" data-excel-update-type="1">${item.updateType}</span>
                 ${item.transactionCode !== '-' ? `<span style="display: none;">${item.transactionCode}</span>` : ''}
               </td>
               <td style="text-align:center;">${statusBadge}</td>

@@ -807,6 +807,51 @@
         [data-theme="dark"] #tab-tapisan thead[style*="background: #f1f5f9"] th {
             color: var(--text-primary) !important;
         }
+        [data-theme="dark"] #tab-tapisan #excelTableBody tr {
+            border-bottom-color: #334155 !important;
+        }
+        [data-theme="dark"] #tab-tapisan #excelTableBody td {
+            color: var(--text-primary) !important;
+        }
+        [data-theme="dark"] #tab-tapisan #excelTableBody td[style*="color: #1e293b"],
+        [data-theme="dark"] #tab-tapisan #excelTableBody td[style*="font-weight:bold; color: #1e293b"] {
+            color: #f1f5f9 !important;
+        }
+        [data-theme="dark"] #tab-tapisan #excelTableBody td[style*="color: #475569"] {
+            color: #94a3b8 !important;
+        }
+        [data-theme="dark"] #tab-tapisan #excelTableBody td[style*="color: #f59e0b"] {
+            color: #fbbf24 !important;
+        }
+        [data-theme="dark"] #tab-tapisan #excelTableBody td[style*="color: #333"] {
+            color: #e2e8f0 !important;
+        }
+        [data-theme="dark"] #tab-tapisan #excelTableBody td span[style*="background: rgba(255,255,255,0.7)"] {
+            background: rgba(30,41,59,0.8) !important;
+            color: #e2e8f0 !important;
+            border-color: #475569 !important;
+        }
+        [data-theme="dark"] #tab-tapisan .excel-row-check {
+            accent-color: var(--theme-color);
+        }
+        [data-theme="dark"] #tab-tapisan #districtGrid button {
+            background-color: #334155 !important;
+            color: #e2e8f0 !important;
+        }
+        [data-theme="dark"] #tab-tapisan #districtGrid button:hover {
+            background-color: #475569 !important;
+        }
+        [data-theme="dark"] #tab-tapisan #excelTableBody span[style*="background: #e2e8f0"][style*="color: #475569"] {
+            background: #334155 !important;
+            color: #94a3b8 !important;
+        }
+        [data-theme="dark"] #tab-tapisan #excelTableBody tr.row-new td { color: var(--text-primary) !important; }
+        [data-theme="dark"] #tab-tapisan #excelTableBody tr.row-renewal td { color: var(--text-primary) !important; }
+        [data-theme="dark"] #tab-tapisan #excelTableBody tr.row-info td { color: var(--text-primary) !important; }
+        [data-theme="dark"] #tab-tapisan #excelTableBody tr.row-grade td { color: var(--text-primary) !important; }
+        [data-theme="dark"] #tab-tapisan #excelTableBody tr[style*="border-bottom"] {
+            border-bottom-color: #334155 !important;
+        }
 
         .app-layout {
             display: flex;
