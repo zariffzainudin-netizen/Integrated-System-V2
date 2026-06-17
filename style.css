@@ -778,6 +778,35 @@
             background: linear-gradient(90deg, var(--theme-color), var(--theme-light)) !important;
         }
 
+        /* ========== DARK MODE: Tab Tapisan ========== */
+        [data-theme="dark"] #tab-tapisan .card > div[style*="background: #f8fafc"] {
+            background: var(--bg-card) !important;
+            border-color: var(--theme-color) !important;
+        }
+        [data-theme="dark"] #tab-tapisan .card > div[style*="background: #f8fafc"] p[style*="margin-top: 20px"] {
+            color: var(--theme-color) !important;
+        }
+        [data-theme="dark"] #tab-tapisan #districtFilterContainer,
+        [data-theme="dark"] #tab-tapisan #excelResultsContainer {
+            background: var(--bg-card) !important;
+            border-color: var(--border) !important;
+        }
+        [data-theme="dark"] #tab-tapisan #districtFilterContainer h3 {
+            color: var(--text-primary) !important;
+        }
+        [data-theme="dark"] #tab-tapisan #excelResultsContainer p strong {
+            color: var(--text-primary) !important;
+        }
+        [data-theme="dark"] #tab-tapisan #excelResultsContainer div[style*="overflow-x: auto"] {
+            border-color: var(--border) !important;
+        }
+        [data-theme="dark"] #tab-tapisan thead[style*="background: #f1f5f9"] {
+            background: var(--bg-page) !important;
+        }
+        [data-theme="dark"] #tab-tapisan thead[style*="background: #f1f5f9"] th {
+            color: var(--text-primary) !important;
+        }
+
         .app-layout {
             display: flex;
             min-height: 100vh;
