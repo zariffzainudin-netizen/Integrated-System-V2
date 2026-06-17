@@ -254,7 +254,7 @@
             margin: 0;
             padding: 0;
             width: 100%;
-            overflow-x: hidden;
+            overflow-x: auto;
             color: var(--text-primary);
             background: var(--bg-page);
             min-height: 100vh;
@@ -264,6 +264,11 @@
 
         /* Animated gradient for main content area (per-user theme color) */
         .main-content {
+            flex: 1;
+            padding: var(--space-lg);
+            max-width: 100%;
+            min-width: 0;
+            overflow-x: auto;
             background: linear-gradient(-45deg, var(--gradient-1), var(--gradient-2), var(--gradient-3), var(--gradient-4));
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
@@ -1301,12 +1306,6 @@
             box-shadow: 2px 0 12px rgba(0,0,0,0.04);
         }
 
-        .main-content {
-            flex: 1;
-            padding: var(--space-lg);
-            max-width: 100%;
-        }
-
         .top-controls {
             display: none;
         }
@@ -1485,19 +1484,20 @@
             top: 10px;
             left: calc(var(--sidebar-width) + 10px);
             background: rgba(255,255,255,0.9);
-            border: 2px solid white;
+            border: 2px solid var(--theme-color);
             border-radius: 30px;
-            padding: 6px 12px;
-            font-size: 1.1rem;
-            font-weight: bold;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            font-weight: 700;
             color: var(--theme-color);
             cursor: pointer;
             z-index: 100;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
+            letter-spacing: 0.3px;
         }
 
         .btn-top-fullview:hover {
