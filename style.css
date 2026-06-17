@@ -820,6 +820,11 @@
         .sidebar-unpinned .app-sidebar {
             left: -100%;
         }
+        
+        /* When unpinned but opened via hamburger on desktop */
+        .sidebar-unpinned .app-sidebar.show-menu {
+            left: 0;
+        }
 
         .sidebar-unpinned .desktop-menu-btn {
             display: flex;

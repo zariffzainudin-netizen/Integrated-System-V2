@@ -6550,6 +6550,14 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
                     appLayout.classList.remove('sidebar-unpinned');
                     togglePin.textContent = '📌';
                     localStorage.setItem('stb_sidebar_pinned', 'true');
+                    // Also close hamburger menu if open
+                    const sidebar = document.querySelector('.app-sidebar');
+                    if (sidebar) sidebar.classList.remove('show-menu');
+                    const overlay = document.getElementById('menuOverlay');
+                    if (overlay) {
+                        overlay.classList.remove('show');
+                        overlay.style.display = 'none';
+                    }
                 }
             });
         }
