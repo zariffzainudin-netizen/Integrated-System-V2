@@ -5020,6 +5020,8 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
         flex-direction: column;
         justify-content: space-between;
         overflow: hidden;
+        page-break-inside: avoid;
+        break-inside: avoid;
       }
       
       .ver-title {
