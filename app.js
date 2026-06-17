@@ -732,8 +732,12 @@ async function handleCredentialResponse(response) {
   let loadingProgressInterval = null;
   let typeMonthlyChart = null;
   let typeYearlyChart = null;
-  let approverMonthlyChart = null;
-  let recommenderMonthlyChart = null;
+  let trendChart = null;
+  let trendPeriod = 'monthly';
+  let trendMonth = '';
+  let trendWeek = '';
+  let trendDataCache = null;
+  let trendIsRecommender = true;
   
   let isDashboardFirstLoad = true;
   
@@ -1620,11 +1624,11 @@ async function handleCredentialResponse(response) {
     
     if (currentUser.role === 'PENGESYOR') {
        if (typeof updateRecommenderCharts === 'function') {
-           updateRecommenderCharts(userSpecificData, filteredData);
+           updateRecommenderCharts(userSpecificData);
        }
     } else if (currentUser.role === 'PELULUS' || currentUser.role === 'ADMIN' || currentUser.role === 'KETUA SEKSYEN' || currentUser.role === 'PENGARAH') {
        if (typeof updateApproverCharts === 'function') {
-           updateApproverCharts(userSpecificData, filteredData);
+           updateApproverCharts(userSpecificData);
        }
     }
     
@@ -1991,91 +1995,148 @@ async function handleCredentialResponse(response) {
     typeStats.innerHTML = badgesHtml;
   }
 
-  function updateRecommenderCharts(userData, filteredData) {
-    if (recommenderMonthlyChart) { recommenderMonthlyChart.destroy(); recommenderMonthlyChart = null; }
-    const monthlyTrendCanvas = document.getElementById('chartMonthlyTrend');
-    if (!monthlyTrendCanvas) return;
-    const monthlyCtx = monthlyTrendCanvas.getContext('2d');
-    
-    monthlyCtx.clearRect(0, 0, monthlyTrendCanvas.width, monthlyTrendCanvas.height);
-    const monthlyData = {};
-    const monthlyLabels = [];
-    const currentYear = dashboardData.currentYear;
-    const currentMonth = dashboardData.currentMonth;
-    
-    const monthsToShow = 6;
-    for (let i = monthsToShow - 1; i >= 0; i--) {
-      const date = new Date(currentYear, currentMonth - 1 - i, 1);
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      const monthLabel = `${date.toLocaleString('ms-MY', { month: 'short' })} ${date.getFullYear()}`;
-      monthlyData[monthKey] = { label: monthLabel, supported: 0, notSupported: 0 };
-      monthlyLabels.push(monthKey);
-    }
-    
-    filteredData.forEach(item => {
-      let dateToUse = resolveRecordDate(item);
-      if (dateToUse && !isNaN(dateToUse)) {
-        const date = dateToUse;
-        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-        if (monthlyData[monthKey]) {
-          if (item.syor_status && item.syor_status.includes('TIDAK DISOKONG')) monthlyData[monthKey].notSupported++;
-          else if (item.syor_status && item.syor_status.includes('SOKONG')) monthlyData[monthKey].supported++;
-        }
+  function updateRecommenderCharts(userData) {
+    trendDataCache = userData;
+    trendIsRecommender = true;
+    initTrendToggle();
+    renderTrendChart();
+  }
+
+  function updateApproverCharts(userData) {
+    trendDataCache = userData;
+    trendIsRecommender = false;
+    initTrendToggle();
+    renderTrendChart();
+  }
+
+  function getISOWeek(date) {
+    const d = new Date(date);
+    d.setHours(0,0,0,0);
+    d.setDate(d.getDate() + 3 - (d.getDay() + 6) % 7);
+    const week1 = new Date(d.getFullYear(), 0, 4);
+    return `${d.getFullYear()}-W${String(1 + Math.round(((d - week1) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7)).padStart(2,'0')}`;
+  }
+
+  function getWeekLabel(weekKey) {
+    if (!weekKey) return '';
+    const parts = weekKey.split('-W');
+    if (parts.length !== 2) return weekKey;
+    return `Minggu ${parts[1]}, ${parts[0]}`;
+  }
+
+  function initTrendToggle() {
+    const toggleContainer = document.getElementById('trendPeriodToggle');
+    if (!toggleContainer || toggleContainer.dataset.initialized) return;
+    toggleContainer.dataset.initialized = '1';
+    const btns = toggleContainer.querySelectorAll('.trend-btn');
+    const monthSelect = document.getElementById('trendMonthSelect');
+    const weekSelect = document.getElementById('trendWeekSelect');
+    btns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        btns.forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        trendPeriod = this.dataset.period;
+        monthSelect.style.display = trendPeriod === 'weekly' ? 'inline-block' : 'none';
+        weekSelect.style.display = trendPeriod === 'daily' ? 'inline-block' : 'none';
+        if (trendPeriod === 'monthly') { trendMonth = ''; trendWeek = ''; monthSelect.value = ''; weekSelect.value = ''; }
+        renderTrendChart();
+      });
+    });
+    monthSelect.addEventListener('change', function() {
+      trendMonth = this.value;
+      trendWeek = '';
+      weekSelect.value = '';
+      weekSelect.style.display = 'none';
+      renderTrendChart();
+    });
+    weekSelect.addEventListener('change', function() {
+      trendWeek = this.value;
+      renderTrendChart();
+    });
+  }
+
+  function renderTrendChart() {
+    if (trendChart) { trendChart.destroy(); trendChart = null; }
+    const data = trendDataCache;
+    if (!data) return;
+    if (trendPeriod === 'monthly') renderMonthlyTrend(data);
+    else if (trendPeriod === 'weekly') renderWeeklyTrend(data);
+    else if (trendPeriod === 'daily') renderDailyTrend(data);
+  }
+
+  function groupByPeriod(data, periodKey) {
+    const groups = {};
+    data.forEach(item => {
+      const d = resolveRecordDate(item);
+      if (!d || isNaN(d)) return;
+      let key;
+      if (periodKey === 'month') key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+      else if (periodKey === 'week') key = getISOWeek(d);
+      else if (periodKey === 'day') key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      if (!groups[key]) groups[key] = { key, date: d, positive: 0, negative: 0 };
+      if (trendIsRecommender) {
+        if (item.syor_status && item.syor_status.includes('SOKONG')) groups[key].positive++;
+        else if (item.syor_status && item.syor_status.includes('TIDAK DISOKONG')) groups[key].negative++;
+      } else {
+        if (item.kelulusan && item.kelulusan.includes('LULUS')) groups[key].positive++;
+        else if (item.kelulusan && (item.kelulusan.includes('TOLAK') || item.kelulusan.includes('SIASAT'))) groups[key].negative++;
       }
     });
-    
-    // Kira kumulatif untuk ogif
-    let cumSupported = 0, cumNotSupported = 0;
-    const cumulativeSupported = monthlyLabels.map(key => { cumSupported += monthlyData[key]?.supported || 0; return cumSupported; });
-    const cumulativeNotSupported = monthlyLabels.map(key => { cumNotSupported += monthlyData[key]?.notSupported || 0; return cumNotSupported; });
-    const cumulativeTotal = monthlyLabels.map((_, i) => cumulativeSupported[i] + cumulativeNotSupported[i]);
-    
-    recommenderMonthlyChart = new Chart(monthlyCtx, {
+    return groups;
+  }
+
+  function getSortedKeys(groups) {
+    return Object.keys(groups).sort();
+  }
+
+  function renderMonthlyTrend(data) {
+    const canvas = document.getElementById('chartMonthlyTrend');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const groups = groupByPeriod(data, 'month');
+    const keys = getSortedKeys(groups);
+    const currentYear = dashboardData.currentYear;
+    const currentMonth = dashboardData.currentMonth;
+    const monthsToShow = 6;
+    const monthlyLabels = [];
+    const monthlyData = {};
+    for (let i = monthsToShow - 1; i >= 0; i--) {
+      const d = new Date(currentYear, currentMonth - 1 - i, 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+      const label = `${d.toLocaleString('ms-MY',{month:'short'})} ${d.getFullYear()}`;
+      monthlyData[key] = { label, positive: groups[key]?.positive || 0, negative: groups[key]?.negative || 0 };
+      monthlyLabels.push(key);
+    }
+    let cumPos = 0, cumNeg = 0;
+    const cumPositive = monthlyLabels.map(k => { cumPos += monthlyData[k].positive; return cumPos; });
+    const cumNegative = monthlyLabels.map(k => { cumNeg += monthlyData[k].negative; return cumNeg; });
+    const title = trendIsRecommender ? 'Trend Syor Bulanan (Ogif)' : 'Trend Kelulusan Bulanan (Ogif)';
+    const posLabel = trendIsRecommender ? 'Kumulatif SOKONG' : 'Kumulatif DILULUSKAN';
+    const negLabel = trendIsRecommender ? 'Kumulatif TIDAK DISOKONG' : 'Kumulatif DITOLAK/SIASAT';
+    trendChart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: monthlyLabels.map(key => monthlyData[key]?.label || key),
+        labels: monthlyLabels.map(k => monthlyData[k].label),
         datasets: [
-          {
-            label: 'Kumulatif SOKONG',
-            data: cumulativeSupported,
-            borderColor: '#10b981',
-            backgroundColor: 'rgba(16,185,129,0.1)',
-            fill: true,
-            tension: 0.3,
-            pointRadius: 4,
-            pointBackgroundColor: '#10b981',
-          },
-          {
-            label: 'Kumulatif TIDAK DISOKONG',
-            data: cumulativeNotSupported,
-            borderColor: '#ef4444',
-            backgroundColor: 'rgba(239,68,68,0.1)',
-            fill: true,
-            tension: 0.3,
-            pointRadius: 4,
-            pointBackgroundColor: '#ef4444',
-          }
+          { label: posLabel, data: cumPositive, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', fill: true, tension: 0.3, pointRadius: 4, pointBackgroundColor: '#10b981' },
+          { label: negLabel, data: cumNegative, borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.1)', fill: true, tension: 0.3, pointRadius: 4, pointBackgroundColor: '#ef4444' }
         ]
       },
       options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: { duration: 1500, easing: 'easeOutQuart' },
-        scales: {
-          y: { beginAtZero: true, title: { display: true, text: 'Kumulatif' }, ticks: { stepSize: 1 }, border: { display: false } },
-          x: { title: { display: true, text: 'Bulan' }, grid: { display: false }, border: { display: false } }
-        },
+        responsive: true, maintainAspectRatio: false, animation: { duration: 1500, easing: 'easeOutQuart' },
+        scales: { y: { beginAtZero: true, title: { display: true, text: 'Kumulatif' }, ticks: { stepSize: 1 }, border: { display: false } }, x: { title: { display: true, text: 'Bulan' }, grid: { display: false }, border: { display: false } } },
         plugins: {
           legend: { position: 'top' },
-          title: { display: true, text: 'Trend Syor Bulanan (Ogif)' },
+          title: { display: true, text: title },
           tooltip: {
             callbacks: {
               label: function(context) {
                 const i = context.dataIndex;
-                const rawSupported = monthlyLabels.map(k => monthlyData[k]?.supported || 0);
-                const rawNotSupported = monthlyLabels.map(k => monthlyData[k]?.notSupported || 0);
-                if (context.datasetIndex === 0) return `Kumulatif SOKONG: ${context.raw} (Bulan ini: ${rawSupported[i]})`;
-                if (context.datasetIndex === 1) return `Kumulatif TIDAK DISOKONG: ${context.raw} (Bulan ini: ${rawNotSupported[i]})`;
+                const rawP = monthlyLabels.map(k => monthlyData[k].positive);
+                const rawN = monthlyLabels.map(k => monthlyData[k].negative);
+                if (context.datasetIndex === 0) return `${posLabel}: ${context.raw} (Bulan ini: ${rawP[i]})`;
+                if (context.datasetIndex === 1) return `${negLabel}: ${context.raw} (Bulan ini: ${rawN[i]})`;
                 return context.raw;
               }
             }
@@ -2085,91 +2146,137 @@ async function handleCredentialResponse(response) {
     });
   }
 
-  function updateApproverCharts(userData, filteredData) {
-    if (approverMonthlyChart) { approverMonthlyChart.destroy(); approverMonthlyChart = null; }
-    const monthlyTrendCanvas = document.getElementById('chartMonthlyTrend');
-    if (!monthlyTrendCanvas) return;
-    const monthlyCtx = monthlyTrendCanvas.getContext('2d');
-    
-    monthlyCtx.clearRect(0, 0, monthlyTrendCanvas.width, monthlyTrendCanvas.height);
-    const monthlyData = {};
-    const monthlyLabels = [];
-    const currentYear = dashboardData.currentYear;
-    const currentMonth = dashboardData.currentMonth;
-    
-    const monthsToShow = 6;
-    for (let i = monthsToShow - 1; i >= 0; i--) {
-      const date = new Date(currentYear, currentMonth - 1 - i, 1);
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      const monthLabel = `${date.toLocaleString('ms-MY', { month: 'short' })} ${date.getFullYear()}`;
-      monthlyData[monthKey] = { label: monthLabel, approved: 0, rejected: 0 };
-      monthlyLabels.push(monthKey);
-    }
-    
-    filteredData.forEach(item => {
-      // Gunakan tarikh dinamik berdasarkan status tindakan
-      let dateToUse = resolveRecordDate(item);
-      if (dateToUse && !isNaN(dateToUse)) {
-        const date = dateToUse;
-        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-        if (monthlyData[monthKey]) {
-          if (item.kelulusan && item.kelulusan.includes('LULUS')) monthlyData[monthKey].approved++;
-          else if (item.kelulusan && (item.kelulusan.includes('TOLAK') || item.kelulusan.includes('SIASAT'))) monthlyData[monthKey].rejected++;
-        }
-      }
+  function renderWeeklyTrend(data) {
+    const canvas = document.getElementById('chartMonthlyTrend');
+    if (!canvas) return;
+    const monthSelect = document.getElementById('trendMonthSelect');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    // Populate month selector
+    const groups = groupByPeriod(data, 'month');
+    const availableMonths = Object.keys(groups).sort();
+    const currentVal = monthSelect.value;
+    monthSelect.innerHTML = '<option value="">Pilih Bulan</option>';
+    availableMonths.forEach(m => {
+      const d = new Date(parseInt(m.split('-')[0]), parseInt(m.split('-')[1])-1, 1);
+      const label = `${d.toLocaleString('ms-MY',{month:'long'})} ${d.getFullYear()}`;
+      const opt = document.createElement('option');
+      opt.value = m; opt.textContent = label;
+      if (m === currentVal) opt.selected = true;
+      monthSelect.appendChild(opt);
     });
-    
-    // Kira kumulatif untuk ogif
-    let cumApproved = 0, cumRejected = 0;
-    const cumulativeApproved = monthlyLabels.map(key => { cumApproved += monthlyData[key]?.approved || 0; return cumApproved; });
-    const cumulativeRejected = monthlyLabels.map(key => { cumRejected += monthlyData[key]?.rejected || 0; return cumRejected; });
-    
-    approverMonthlyChart = new Chart(monthlyCtx, {
+    monthSelect.style.display = 'inline-block';
+    if (!trendMonth) { trendChart = null; return; }
+    // Filter data for selected month and group by week
+    const monthData = data.filter(item => {
+      const d = resolveRecordDate(item);
+      if (!d || isNaN(d)) return false;
+      const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+      return key === trendMonth;
+    });
+    const weekGroups = groupByPeriod(monthData, 'week');
+    const weekKeys = getSortedKeys(weekGroups);
+    if (weekKeys.length === 0) { trendChart = null; return; }
+    let cumPos = 0, cumNeg = 0;
+    const cumPositive = weekKeys.map(k => { cumPos += weekGroups[k].positive; return cumPos; });
+    const cumNegative = weekKeys.map(k => { cumNeg += weekGroups[k].negative; return cumNeg; });
+    const title = trendIsRecommender ? 'Trend Syor Mingguan (Ogif)' : 'Trend Kelulusan Mingguan (Ogif)';
+    const posLabel = trendIsRecommender ? 'Kumulatif SOKONG' : 'Kumulatif DILULUSKAN';
+    const negLabel = trendIsRecommender ? 'Kumulatif TIDAK DISOKONG' : 'Kumulatif DITOLAK/SIASAT';
+    trendChart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: monthlyLabels.map(key => monthlyData[key]?.label || key),
+        labels: weekKeys.map(k => getWeekLabel(k)),
         datasets: [
-          {
-            label: 'Kumulatif DILULUSKAN',
-            data: cumulativeApproved,
-            borderColor: '#10b981',
-            backgroundColor: 'rgba(16,185,129,0.1)',
-            fill: true,
-            tension: 0.3,
-            pointRadius: 4,
-            pointBackgroundColor: '#10b981',
-          },
-          {
-            label: 'Kumulatif DITOLAK/SIASAT',
-            data: cumulativeRejected,
-            borderColor: '#ef4444',
-            backgroundColor: 'rgba(239,68,68,0.1)',
-            fill: true,
-            tension: 0.3,
-            pointRadius: 4,
-            pointBackgroundColor: '#ef4444',
-          }
+          { label: posLabel, data: cumPositive, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', fill: true, tension: 0.3, pointRadius: 4, pointBackgroundColor: '#10b981' },
+          { label: negLabel, data: cumNegative, borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.1)', fill: true, tension: 0.3, pointRadius: 4, pointBackgroundColor: '#ef4444' }
         ]
       },
       options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: { duration: 1500, easing: 'easeOutQuart' },
-        scales: {
-          y: { beginAtZero: true, title: { display: true, text: 'Kumulatif' }, ticks: { stepSize: 1 }, border: { display: false } },
-          x: { title: { display: true, text: 'Bulan' }, grid: { display: false }, border: { display: false } }
-        },
+        responsive: true, maintainAspectRatio: false, animation: { duration: 1000, easing: 'easeOutQuart' },
+        scales: { y: { beginAtZero: true, title: { display: true, text: 'Kumulatif' }, ticks: { stepSize: 1 }, border: { display: false } }, x: { title: { display: true, text: 'Minggu' }, grid: { display: false }, border: { display: false } } },
         plugins: {
           legend: { position: 'top' },
-          title: { display: true, text: 'Trend Kelulusan Bulanan (Ogif)' },
+          title: { display: true, text: title },
           tooltip: {
             callbacks: {
               label: function(context) {
                 const i = context.dataIndex;
-                const rawApproved = monthlyLabels.map(k => monthlyData[k]?.approved || 0);
-                const rawRejected = monthlyLabels.map(k => monthlyData[k]?.rejected || 0);
-                if (context.datasetIndex === 0) return `Kumulatif DILULUSKAN: ${context.raw} (Bulan ini: ${rawApproved[i]})`;
-                if (context.datasetIndex === 1) return `Kumulatif DITOLAK/SIASAT: ${context.raw} (Bulan ini: ${rawRejected[i]})`;
+                const rawP = weekKeys.map(k => weekGroups[k].positive);
+                const rawN = weekKeys.map(k => weekGroups[k].negative);
+                if (context.datasetIndex === 0) return `${posLabel}: ${context.raw} (Minggu ini: ${rawP[i]})`;
+                if (context.datasetIndex === 1) return `${negLabel}: ${context.raw} (Minggu ini: ${rawN[i]})`;
+                return context.raw;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  function renderDailyTrend(data) {
+    const canvas = document.getElementById('chartMonthlyTrend');
+    if (!canvas) return;
+    const weekSelect = document.getElementById('trendWeekSelect');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    // Populate week selector based on selected month or all data
+    const groups = groupByPeriod(data, 'week');
+    const availableWeeks = Object.keys(groups).sort();
+    const currentVal = weekSelect.value;
+    weekSelect.innerHTML = '<option value="">Pilih Minggu</option>';
+    availableWeeks.forEach(w => {
+      const opt = document.createElement('option');
+      opt.value = w; opt.textContent = getWeekLabel(w);
+      if (w === currentVal) opt.selected = true;
+      weekSelect.appendChild(opt);
+    });
+    weekSelect.style.display = 'inline-block';
+    if (!trendWeek) { trendChart = null; return; }
+    // Filter data for selected week and group by day
+    const weekData = data.filter(item => {
+      const d = resolveRecordDate(item);
+      if (!d || isNaN(d)) return false;
+      return getISOWeek(d) === trendWeek;
+    });
+    const dayGroups = groupByPeriod(weekData, 'day');
+    const dayKeys = getSortedKeys(dayGroups);
+    if (dayKeys.length === 0) { trendChart = null; return; }
+    let cumPos = 0, cumNeg = 0;
+    const cumPositive = dayKeys.map(k => { cumPos += dayGroups[k].positive; return cumPos; });
+    const cumNegative = dayKeys.map(k => { cumNeg += dayGroups[k].negative; return cumNeg; });
+    const dayLabels = dayKeys.map(k => {
+      const parts = k.split('-');
+      const d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+      return d.toLocaleDateString('ms-MY', { weekday:'short', day:'numeric', month:'short' });
+    });
+    const title = trendIsRecommender ? 'Trend Syor Harian (Ogif)' : 'Trend Kelulusan Harian (Ogif)';
+    const posLabel = trendIsRecommender ? 'Kumulatif SOKONG' : 'Kumulatif DILULUSKAN';
+    const negLabel = trendIsRecommender ? 'Kumulatif TIDAK DISOKONG' : 'Kumulatif DITOLAK/SIASAT';
+    trendChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: dayLabels,
+        datasets: [
+          { label: posLabel, data: cumPositive, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', fill: true, tension: 0.3, pointRadius: 4, pointBackgroundColor: '#10b981' },
+          { label: negLabel, data: cumNegative, borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.1)', fill: true, tension: 0.3, pointRadius: 4, pointBackgroundColor: '#ef4444' }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, animation: { duration: 1000, easing: 'easeOutQuart' },
+        scales: { y: { beginAtZero: true, title: { display: true, text: 'Kumulatif' }, ticks: { stepSize: 1 }, border: { display: false } }, x: { title: { display: true, text: 'Hari' }, grid: { display: false }, border: { display: false } } },
+        plugins: {
+          legend: { position: 'top' },
+          title: { display: true, text: title },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const i = context.dataIndex;
+                const rawP = dayKeys.map(k => dayGroups[k].positive);
+                const rawN = dayKeys.map(k => dayGroups[k].negative);
+                if (context.datasetIndex === 0) return `${posLabel}: ${context.raw} (Hari ini: ${rawP[i]})`;
+                if (context.datasetIndex === 1) return `${negLabel}: ${context.raw} (Hari ini: ${rawN[i]})`;
                 return context.raw;
               }
             }
@@ -2408,14 +2515,9 @@ async function handleCredentialResponse(response) {
     if (chartTypeMonthlyContainer) chartTypeMonthlyContainer.style.display = 'none';
     if (chartTypeYearlyContainer) chartTypeYearlyContainer.style.display = 'none';
     
-    if (approverMonthlyChart) {
-      approverMonthlyChart.destroy();
-      approverMonthlyChart = null;
-    }
-    
-    if (recommenderMonthlyChart) {
-      recommenderMonthlyChart.destroy();
-      recommenderMonthlyChart = null;
+    if (trendChart) {
+      trendChart.destroy();
+      trendChart = null;
     }
     
     if (typeMonthlyChart) {
@@ -6575,9 +6677,9 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
         }
         
         // Apply sidebar pin
-        const appLayout = document.querySelector('.app-layout');
+        const appContainer = document.getElementById('app-container');
         if (savedPin === 'false' && window.innerWidth > 768) {
-            appLayout.classList.add('sidebar-unpinned');
+            appContainer.classList.add('sidebar-unpinned');
             if (togglePin) togglePin.textContent = '🔓';
         } else {
             if (togglePin) togglePin.textContent = '📌';
@@ -6602,13 +6704,13 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
         // Sidebar pin toggle
         if (togglePin) {
             togglePin.addEventListener('click', () => {
-                const isPinned = !appLayout.classList.contains('sidebar-unpinned');
+                const isPinned = !appContainer.classList.contains('sidebar-unpinned');
                 if (isPinned) {
-                    appLayout.classList.add('sidebar-unpinned');
+                    appContainer.classList.add('sidebar-unpinned');
                     togglePin.textContent = '🔓';
                     localStorage.setItem('stb_sidebar_pinned', 'false');
                 } else {
-                    appLayout.classList.remove('sidebar-unpinned');
+                    appContainer.classList.remove('sidebar-unpinned');
                     togglePin.textContent = '📌';
                     localStorage.setItem('stb_sidebar_pinned', 'true');
                     // Also close hamburger menu if open

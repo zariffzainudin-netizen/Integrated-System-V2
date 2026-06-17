@@ -1111,7 +1111,7 @@
             display: flex;
         }
 
-        .sidebar-unpinned #app-container {
+        #app-container.sidebar-unpinned {
             padding-left: 0 !important;
             padding-top: 0 !important;
         }
@@ -1122,7 +1122,7 @@
             padding: 0;
         }
 
-        .sidebar-unpinned .btn-top-fullview {
+        #app-container.sidebar-unpinned .btn-top-fullview {
             left: 60px;
         }
 
@@ -2569,7 +2569,15 @@
 
         .dashboard-charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
         .chart-container { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); position: relative; min-height: 300px; }
-        .chart-title { font-size: 1rem; font-weight: 700; color: #1e40af; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .chart-title { font-size: 1rem; font-weight: 700; color: #1e40af; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .trend-period-toggle { display: flex; gap: 2px; background: #e2e8f0; border-radius: 6px; padding: 2px; margin-left: 4px; }
+        .trend-btn { border: none; background: transparent; padding: 3px 10px; font-size: 0.75rem; font-weight: 600; border-radius: 4px; cursor: pointer; color: #64748b; transition: all 0.15s; }
+        .trend-btn:hover { color: #1e40af; }
+        .trend-btn.active { background: white; color: #1e40af; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        [data-theme="dark"] .trend-period-toggle { background: #334155; }
+        [data-theme="dark"] .trend-btn { color: #94a3b8; }
+        [data-theme="dark"] .trend-btn:hover { color: #f1f5f9; }
+        [data-theme="dark"] .trend-btn.active { background: #1e293b; color: #f1f5f9; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
         .chart-canvas-container { height: 250px; position: relative; margin: 0 auto; }
 
         .monthly-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
