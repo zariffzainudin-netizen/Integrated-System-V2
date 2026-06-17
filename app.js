@@ -9415,6 +9415,7 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
           }
         }, 1000);
         await CustomAppModal.alert("GAGAL menghantar data: " + errorMsg, "Ralat", "error");
+      });
     } else {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000);
