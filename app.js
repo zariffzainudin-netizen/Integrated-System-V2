@@ -1622,13 +1622,24 @@ async function handleCredentialResponse(response) {
       }
     }
     
+    let unfilteredUserData = cachedData.filter(item => {
+      if (currentUser.role === 'ADMIN' || currentUser.role === 'KETUA SEKSYEN' || currentUser.role === 'PENGARAH') {
+        return true;
+      } else if (currentUser.role === 'PENGESYOR') {
+        return item.pengesyor && item.pengesyor.trim().toUpperCase() === currentUser.name.trim().toUpperCase();
+      } else if (currentUser.role === 'PELULUS') {
+        return item.pelulus && item.pelulus.trim().toUpperCase() === currentUser.name.trim().toUpperCase();
+      }
+      return false;
+    });
+
     if (currentUser.role === 'PENGESYOR') {
        if (typeof updateRecommenderCharts === 'function') {
-           updateRecommenderCharts(userSpecificData);
+           updateRecommenderCharts(unfilteredUserData);
        }
     } else if (currentUser.role === 'PELULUS' || currentUser.role === 'ADMIN' || currentUser.role === 'KETUA SEKSYEN' || currentUser.role === 'PENGARAH') {
        if (typeof updateApproverCharts === 'function') {
-           updateApproverCharts(userSpecificData);
+           updateApproverCharts(unfilteredUserData);
        }
     }
     
@@ -10838,27 +10849,33 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
           btn.style.borderRadius = '8px';
           btn.style.fontWeight = 'bold';
           btn.style.fontSize = '0.95rem';
-          btn.style.border = 'none';
+          btn.style.border = '2px solid';
           btn.style.cursor = 'pointer';
           btn.style.transition = 'all 0.2s ease';
           
           if(isActive) {
               btn.style.backgroundColor = 'var(--theme-color)';
               btn.style.color = 'white';
+              btn.style.borderColor = 'var(--theme-color)';
               btn.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
           } else {
-              btn.style.backgroundColor = isDark ? '#334155' : '#e2e8f0';
-              btn.style.color = isDark ? '#e2e8f0' : '#475569';
+              btn.style.backgroundColor = 'transparent';
+              btn.style.color = 'var(--theme-color)';
+              btn.style.borderColor = 'var(--theme-color)';
               btn.style.boxShadow = 'none';
           }
           
           btn.innerText = d;
           
           btn.onmouseover = () => {
-              if (!isActive) btn.style.backgroundColor = isDark ? '#475569' : '#cbd5e1';
+              if (!isActive) {
+                  btn.style.backgroundColor = isDark ? '#1e293b' : '#f1f5f9';
+              }
           };
           btn.onmouseout = () => {
-              if (!isActive) btn.style.backgroundColor = isDark ? '#334155' : '#e2e8f0';
+              if (!isActive) {
+                  btn.style.backgroundColor = 'transparent';
+              }
           };
 
           btn.onclick = () => {

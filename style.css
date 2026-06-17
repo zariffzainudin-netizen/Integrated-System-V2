@@ -835,11 +835,11 @@
             accent-color: var(--theme-color);
         }
         [data-theme="dark"] #tab-tapisan #districtGrid button {
-            background-color: #334155 !important;
-            color: #e2e8f0 !important;
+            background-color: #334155;
+            color: #e2e8f0;
         }
         [data-theme="dark"] #tab-tapisan #districtGrid button:hover {
-            background-color: #475569 !important;
+            background-color: #475569;
         }
         [data-theme="dark"] #tab-tapisan #excelTableBody span[style*="background: #e2e8f0"][style*="color: #475569"] {
             background: #334155 !important;
