@@ -538,7 +538,218 @@
         [data-theme="dark"] .sidebar-toggle-btn.active {
             background: rgba(37,99,235,0.15);
         }
-        .app-layout {
+
+        /* ========== DARK MODE: Tab-specific ========== */
+        /* Tab Borang Semakan - AI card */
+        [data-theme="dark"] #tab-checker .card.pdf-upload-section {
+            background: var(--bg-card) !important;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2) !important;
+        }
+        [data-theme="dark"] .ai-model-bar {
+            background: var(--bg-page) !important;
+            border-color: var(--border) !important;
+        }
+        [data-theme="dark"] .ai-model-bar label {
+            color: var(--text-primary) !important;
+        }
+        [data-theme="dark"] .morph-box {
+            background: rgba(30,41,59,0.6) !important;
+            border-color: var(--theme-color) !important;
+        }
+        [data-theme="dark"] .morph-percentage {
+            color: var(--text-primary) !important;
+        }
+        [data-theme="dark"] .morph-percentage span {
+            color: var(--text-secondary) !important;
+        }
+        [data-theme="dark"] #pdfResult,
+        [data-theme="dark"] #profilePdfResult {
+            background: var(--bg-card) !important;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3) !important;
+            border-color: #10b981 !important;
+        }
+        [data-theme="dark"] #pdfResult h3,
+        [data-theme="dark"] #profilePdfResult h3 {
+            color: #34d399 !important;
+        }
+
+        /* Tab Input Database - Konsultansi card */
+        [data-theme="dark"] .konsultansi-card,
+        [data-theme="dark"] .pengesyor-card {
+            background: var(--bg-card) !important;
+            border-color: var(--border) !important;
+        }
+        [data-theme="dark"] .konsultansi-card > label:first-child,
+        [data-theme="dark"] .pengesyor-card > label:first-child {
+            color: var(--text-primary) !important;
+        }
+        [data-theme="dark"] .konsultansi-card label[style*="color:#ef4444"],
+        [data-theme="dark"] .konsultansi-card label[style*="color: #ef4444"] {
+            color: #f87171 !important;
+        }
+        [data-theme="dark"] .konsultansi-card div[style*="border-top: 1px dashed #cbd5e1"] {
+            border-top-color: var(--border) !important;
+        }
+        [data-theme="dark"] #db_pengesyor {
+            color: var(--text-primary) !important;
+        }
+        [data-theme="dark"] #label_db_sah_syor,
+        [data-theme="dark"] #label_notify_whatsapp {
+            color: var(--text-primary) !important;
+        }
+        [data-theme="dark"] #container_lawatan {
+            background: var(--bg-card) !important;
+            border-color: var(--border) !important;
+        }
+
+        /* Tab Input Database - Pelulus whatsapp container */
+        [data-theme="dark"] #pelulus_whatsapp_container {
+            background: rgba(59,130,246,0.1) !important;
+            border-color: rgba(59,130,246,0.2) !important;
+        }
+        [data-theme="dark"] #pelulus_whatsapp_container label {
+            color: var(--text-primary) !important;
+        }
+
+        /* Tab Telah Syor - submitted filter container */
+        [data-theme="dark"] #submittedFiltersContainer {
+            background: var(--bg-card) !important;
+            border-color: var(--border) !important;
+        }
+        [data-theme="dark"] #submittedFiltersContainer h3 {
+            color: var(--text-primary) !important;
+        }
+        [data-theme="dark"] .submitted-filter-btn {
+            opacity: 0.9;
+        }
+
+        /* Tab Belum Hantar - draft cards */
+        [data-theme="dark"] .app-item {
+            background: var(--bg-card) !important;
+        }
+        [data-theme="dark"] .app-item[style*="background-color: rgb(209, 250, 229)"] {
+            background-color: rgba(16,185,129,0.1) !important;
+        }
+        [data-theme="dark"] .app-item.blue-bg {
+            background-color: rgba(59,130,246,0.1) !important;
+        }
+
+        /* Tab Bakul - company name */
+        [data-theme="dark"] #bakulTableBody td:first-child {
+            color: var(--text-primary) !important;
+        }
+        [data-theme="dark"] #bakulTableBody td:nth-child(4) span {
+            background: var(--bg-card) !important;
+            border-color: var(--border) !important;
+            color: var(--text-primary) !important;
+        }
+        [data-theme="dark"] #bakulTableBody td:nth-child(5) span {
+            color: var(--text-secondary) !important;
+        }
+
+        /* Perubahan row */
+        [data-theme="dark"] .perubahan-row {
+            background-color: rgba(245,158,11,0.08) !important;
+            border-left-color: rgba(245,158,11,0.3) !important;
+            color: #fbbf24 !important;
+        }
+
+        /* Draft list extra info colors */
+        [data-theme="dark"] .app-info div[style*="color: #555"],
+        [data-theme="dark"] .app-info div[style*="color:#555"] {
+            color: var(--text-secondary) !important;
+        }
+        [data-theme="dark"] .app-info div[style*="color: #047857"],
+        [data-theme="dark"] .app-info div[style*="color:#047857"] {
+            color: #34d399 !important;
+        }
+        [data-theme="dark"] .app-info div[style*="color: #1d4ed8"],
+        [data-theme="dark"] .app-info div[style*="color:#1d4ed8"] {
+            color: #60a5fa !important;
+        }
+        [data-theme="dark"] .app-info div[style*="color: #059669"],
+        [data-theme="dark"] .app-info div[style*="color:#059669"] {
+            color: #34d399 !important;
+        }
+        [data-theme="dark"] .app-info div[style*="background-color: rgb(254, 226, 226)"] {
+            background-color: rgba(239,68,68,0.15) !important;
+            border-color: #dc2626 !important;
+        }
+        [data-theme="dark"] .app-info div[style*="background-color: rgb(220, 252, 231)"] {
+            background-color: rgba(16,185,129,0.15) !important;
+            border-color: #16a34a !important;
+        }
+        [data-theme="dark"] .app-info div[style*="background-color: rgb(255, 251, 235)"] {
+            background-color: rgba(245,158,11,0.08) !important;
+            border-left-color: rgba(245,158,11,0.3) !important;
+            color: #fbbf24 !important;
+        }
+
+        /* Tab Pelulus Action */
+        [data-theme="dark"] #tab-pelulus-action .card > div[style*="background:#fefce8"] {
+            background: rgba(250,204,21,0.08) !important;
+            border-color: rgba(250,204,21,0.2) !important;
+        }
+        [data-theme="dark"] #tab-pelulus-action .card > div[style*="background:#fefce8"] h3 {
+            color: var(--text-primary) !important;
+        }
+        [data-theme="dark"] #tab-pelulus-action div[style*="background:#f0f9ff"] {
+            background: rgba(59,130,246,0.08) !important;
+            border-color: rgba(59,130,246,0.15) !important;
+        }
+        [data-theme="dark"] #tab-pelulus-action div[style*="background:#f0f9ff"] h4 {
+            color: var(--text-primary) !important;
+        }
+        [data-theme="dark"] #pelulus_nama {
+            background: var(--bg-page) !important;
+            color: var(--text-primary) !important;
+        }
+        [data-theme="dark"] #label_pelulus_sah_lulus {
+            color: var(--text-primary) !important;
+        }
+
+        /* Tab Pelulus View */
+        [data-theme="dark"] #tab-pelulus-view .card {
+            border-top-color: var(--text-primary) !important;
+        }
+
+        /* Tab Profile */
+        [data-theme="dark"] #tab-profile .card > div[style*="background: #f0fdf4"] {
+            background: rgba(16,185,129,0.08) !important;
+            border-left-color: #22c55e !important;
+        }
+        [data-theme="dark"] #tab-profile .card > div[style*="background: #f0fdf4"] h3 {
+            color: #34d399 !important;
+        }
+        [data-theme="dark"] #tab-profile .card > div[style*="background: #eff6ff"] {
+            background: rgba(59,130,246,0.08) !important;
+            border-left-color: #3b82f6 !important;
+        }
+        [data-theme="dark"] #tab-profile .card > div[style*="background: #eff6ff"] h3 {
+            color: #60a5fa !important;
+        }
+
+        /* History filter container */
+        [data-theme="dark"] #historyFiltersContainer {
+            background: var(--bg-card) !important;
+            border-color: var(--border) !important;
+        }
+        [data-theme="dark"] #historyFiltersContainer h3 {
+            color: var(--text-primary) !important;
+        }
+
+        /* Status message */
+        [data-theme="dark"] #statusMsg {
+            color: var(--text-primary) !important;
+        }
+
+        /* Empty state in lists */
+        [data-theme="dark"] #applicationsList div[style*="color:#777"],
+        [data-theme="dark"] #applicationsList div[style*="color: #777"],
+        [data-theme="dark"] #historyList div[style*="color:#777"],
+        [data-theme="dark"] #historyList div[style*="color: #777"] {
+            color: var(--text-muted) !important;
+        }
             display: flex;
             min-height: 100vh;
         }
@@ -2217,6 +2428,16 @@
 
         .app-list .app-item { padding: 10px; border-bottom: none; background: transparent; display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box; border-radius: 8px; }
         .app-list { max-height: 400px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; }
+
+        .perubahan-row {
+            background-color: #fffbeb;
+            border-left: 3px solid #f59e0b;
+            padding: 4px 8px;
+            margin-top: 5px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #d97706;
+        }
         .app-item:hover { background: transparent; }
 
         .btn-sm { padding: 6px 12px; font-size: 0.75rem; border-radius: 6px; border: none; cursor: pointer; color: white; margin-left: 5px; }

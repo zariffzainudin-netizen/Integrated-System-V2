@@ -8377,6 +8377,9 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
       if (item.lawatan_submit_sptb && item.lawatan_syor) {
         div.style.backgroundColor = '#d1fae5';
         div.style.borderLeft = '4px solid #10b981';
+        if (document.documentElement.getAttribute('data-theme') === 'dark') {
+          div.style.backgroundColor = 'rgba(16,185,129,0.15)';
+        }
       } else if (item.date_submit && type === 'drafts') {
         div.classList.add('blue-bg');
       }
@@ -8515,12 +8518,12 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
       } else if (jenisUpper === 'UBAH MAKLUMAT') {
         jenisBadge = `<span class="app-type-badge type-ubah-maklumat">UBAH MAKLUMAT</span>`;
         if (item.ubah_maklumat) {
-          perubahanRowHtml = `<div style="background-color:#fffbeb; border-left:3px solid #f59e0b; padding:4px 8px; margin-top:5px; font-size:0.8rem; font-weight:600; color:#d97706;">📝 Perubahan: ${item.ubah_maklumat}</div>`;
+          perubahanRowHtml = `<div class="perubahan-row">📝 Perubahan: ${item.ubah_maklumat}</div>`;
         }
       } else if (jenisUpper === 'UBAH GRED') {
         jenisBadge = `<span class="app-type-badge type-ubah-gred">UBAH GRED</span>`;
         if (item.ubah_gred) {
-          perubahanRowHtml = `<div style="background-color:#fffbeb; border-left:3px solid #f59e0b; padding:4px 8px; margin-top:5px; font-size:0.8rem; font-weight:600; color:#d97706;">📝 Perubahan Gred: ${item.ubah_gred}</div>`;
+          perubahanRowHtml = `<div class="perubahan-row">📝 Perubahan Gred: ${item.ubah_gred}</div>`;
         }
       } else {
         jenisBadge = `<span class="app-type-badge">${item.jenis || 'LAIN-LAIN'}</span>`;
@@ -10907,7 +10910,7 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
 
                       return `
                       <tr class="${rowColorClass}" style="border-bottom: 1px solid #f1f5f9;">
-                          <td style="font-weight:bold; color: #1e3a8a; font-size: 1.05rem;">${d.company}</td>
+                          <td style="font-weight:bold; color: var(--text-primary); font-size: 1.05rem;">${d.company}</td>
                           <td>
                               <span style="font-weight:bold; color: #f59e0b;">${d.grade}</span> <br>
                               <span style="font-size:0.85rem; color:#64748b; font-family: monospace;">${d.cidb}</span>
