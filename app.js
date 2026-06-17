@@ -5019,6 +5019,7 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        overflow: hidden;
       }
       
       .ver-title {
