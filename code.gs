@@ -47,13 +47,12 @@ function getYouTubeKey()   { return _getRequiredProp('YOUTUBE_API_KEY'); }
 // =========================================================================
 function sanitizeText(str) {
   if (typeof str !== 'string') return str;
-  return str.replace(/[&<>"'\/]/g, function(m) {
+  return str.replace(/[&<>"']/g, function(m) {
     if (m === '&') return '&amp;';
     if (m === '<') return '&lt;';
     if (m === '>') return '&gt;';
     if (m === '"') return '&quot;';
     if (m === "'") return '&#x27;';
-    if (m === '/') return '&#x2F;';
     return m;
   });
 }
