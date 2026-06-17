@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
           firebase.initializeApp(firebaseConfig);
       }
       dbFirestore = firebase.firestore();
+      dbFirestore.settings({ experimentalForceLongPolling: true, merge: true });
       authFirebase = firebase.auth();
   } else {
       console.error("Sistem Gagal Memuatkan Firebase. Sila semak fail index.html (CSP).");
@@ -39,11 +40,31 @@ document.addEventListener('DOMContentLoaded', () => {
   let bakulUnsubscribe = null;
 
   // URL APPSCRIPT
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxzCW4UTH9LytuKwm9Yi_ESpbbdsGi3iFzospSZrJJWLVbwnbGgms2Hm0OPNM-UMiGh/exec';
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzAPyPfCMZNNHtJiKez8RvCD-I_dlMpVrHPqAQqxx4xp0kNof7T4CVAdfm58dV105HG/exec';
   
   // Google Client ID
   const GOOGLE_CLIENT_ID = '758579492428-rnfev1nkkf2e6qduhujgtfbhudl2j9td.apps.googleusercontent.com';
   
+  // =========================================================================
+  // SANITISASI FRONTEND (Anti-XSS)
+  // =========================================================================
+  function sanitizeHtml(str) {
+    if (typeof str !== 'string') return str;
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function sanitizeObject(obj) {
+    if (!obj || typeof obj !== 'object') return obj;
+    var out = Array.isArray(obj) ? [] : {};
+    for (var k in obj) {
+      if (obj.hasOwnProperty(k)) {
+        out[k] = typeof obj[k] === 'string' ? sanitizeHtml(obj[k]) : sanitizeObject(obj[k]);
+      }
+    }
+    return out;
+  }
   // =========================================================================
   // PEMBALUT LOCALSTORAGE (Menggantikan chrome.storage.local)
   // =========================================================================
@@ -299,6 +320,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // LANDING PAGE: Scroll indicator click -> scroll to login
+  document.addEventListener('click', (e) => {
+    const scrollIndicator = e.target.closest('.scroll-indicator');
+    if (scrollIndicator) {
+      e.preventDefault();
+      const loginSection = document.getElementById('landingLoginSection');
+      if (loginSection) {
+        loginSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  });
+
+  // LANDING PAGE: Auto-scroll to login if coming back from auth redirect
+  setTimeout(() => {
+    const loginSection = document.getElementById('landingLoginSection');
+    if (loginSection && window.location.hash === '#login') {
+      setTimeout(() => loginSection.scrollIntoView({ behavior: 'smooth', block: 'center' }), 500);
+    }
+  }, 1000);
+
   async function playSuccessSound() {
     await playSoundEffect('positive_chime.mp3');
   }
@@ -422,8 +463,13 @@ async function handleCredentialResponse(response) {
       // KOD BARU: Simpan emel dalam objek currentUser
       currentUser.email = userEmail.toLowerCase();
 
+      console.log("Firebase SDK tersedia:", typeof firebase !== 'undefined', "dbFirestore:", dbFirestore !== null);
+
       // Log masuk ke Firebase untuk SEMUA role supaya Firebase membenarkan akses (Rules)
-      authFirebase.signInAnonymously().then(() => {
+      if (!authFirebase) {
+        console.error("Firebase Auth tidak tersedia. Firebase mungkin gagal dimuatkan.");
+      } else {
+        authFirebase.signInAnonymously().then(function() {
           console.log("Berjaya log masuk ke Firebase untuk fungsi YouTube/Cache.");
           
           // KOD LAMA: Sambungkan ke Firebase Bakul HANYA jika peranan adalah PENGESYOR
@@ -431,16 +477,27 @@ async function handleCredentialResponse(response) {
               currentUserFirebaseCode = result.user.firebaseCode || null; 
               if (currentUserFirebaseCode) {
                   console.log("Menyambung ke Firebase Bakul dengan kod:", currentUserFirebaseCode);
-                  dbFirestore.collection("users").doc(currentUserFirebaseCode).get().then(doc => {
+                  dbFirestore.collection("users").doc(currentUserFirebaseCode).get()
+                    .then(function(doc) {
                       if (doc.exists) {
                           firebaseUserRules = doc.data();
                           console.log("Peraturan Tapisan Firebase dimuatkan.");
                           subscribeToBakulFirebase();
+                      } else {
+                          console.error("Dokumen Firebase users/" + currentUserFirebaseCode + " tidak wujud. Sila buat dokumen ini di Firebase Console.");
                       }
-                  });
+                    })
+                    .catch(function(fbErr) {
+                      console.error("Ralat Firestore get() untuk users/" + currentUserFirebaseCode + ":", fbErr);
+                    });
+              } else {
+                  console.warn("PENGESYOR tanpa Firebase Code. Pastikan setupFirebaseCodes() telah dijalankan di Apps Script Editor.");
               }
           }
-      }).catch(err => console.error("Ralat Firebase Auth:", err));
+        }).catch(function(authErr) {
+          console.error("Ralat Firebase Auth (signInAnonymously):", authErr);
+        });
+      }
 
       // Simpan sesi dan tarikh hari ini ke storage
       const todayStr = new Date().toDateString();
@@ -489,6 +546,8 @@ async function handleCredentialResponse(response) {
 }
   
   // Fungsi untuk menghantar email ke backend
+  // NOTA KESELAMATAN: Backend guna Session.getActiveUser().getEmail() server-side,
+  // email dari frontend sebagai fallback jika sesi Google tidak tersedia (contoh: fetch API).
   async function verifyEmailWithBackend(email) {
     console.log("V6.5.2 Verifying email with backend:", email);
     
@@ -506,7 +565,7 @@ async function handleCredentialResponse(response) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      const result = await response.json();
+      const result = sanitizeObject(await response.json());
       console.log("V6.5.2 Backend verification response:", result);
       
       return result;
@@ -557,10 +616,8 @@ async function handleCredentialResponse(response) {
       return;
     }
     
-    // Pastikan Google API sudah dimuatkan
     if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
       console.warn("V6.5.2 Google Identity Services API not loaded yet");
-      // Cuba lagi selepas 500ms
       setTimeout(initializeGoogleSignIn, 500);
       return;
     }
@@ -568,39 +625,33 @@ async function handleCredentialResponse(response) {
     console.log("V6.5.2 Initializing Google Identity Services...");
     
     try {
-      // Initialize Google Sign-In
       google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
         callback: handleCredentialResponse,
-        auto_select: false,
+        auto_select: true,
         cancel_on_tap_outside: true
       });
       
-      // Render butang Google Sign-In (Gaya Moden)
+      // Render butang Google Sign-In
       google.accounts.id.renderButton(
         googleButton,
         { 
-          theme: 'filled_blue', // Tukar dari outline ke filled_blue
+          theme: 'outline',
           size: 'large',
           type: 'standard',
-          shape: 'pill',       // Tukar dari rectangular ke pill (bujur)
-          width: '320',        // Lebar yang lebih selesa
+          shape: 'pill',
+          width: '320',
           logo_alignment: 'left'
         }
       );
       
-      // Tunjukkan googleButton
       googleButton.style.display = 'flex';
-      googleButton.style.justifyContent = 'center';
-      googleButton.style.alignItems = 'center';
-      googleButton.style.padding = '10px';
       
-      console.log("V6.5.2 Google Sign-In button rendered successfully");
+      console.log("V6.5.2 Google Sign-In button rendered");
       
     } catch (error) {
       console.error("V6.5.2 Error initializing Google Sign-In:", error);
       
-      // Fallback: tunjuk mesej error di login screen
       if (loginError) {
         loginError.style.display = 'block';
         loginError.textContent = 'Ralat memuatkan Google Sign-In. Sila muat semula halaman.';
@@ -1809,6 +1860,10 @@ async function handleCredentialResponse(response) {
     });
   }
 
+  // =========================================================================
+  // FUNGSI INITIALIZE DASHBOARD
+  // =========================================================================
+
   function initializeDashboard() {
     console.log("V6.5.2 Initializing dashboard...");
     
@@ -2869,9 +2924,9 @@ async function handleCredentialResponse(response) {
   // FUNGSI MUAT TURUN CSV
   // =========================================================================
   
-  async function downloadAdminStatsCSV() {
+  function downloadAdminStatsCSV() {
     if (!cachedData || cachedData.length === 0) {
-      await CustomAppModal.alert("Tiada data untuk dimuat turun.", "Tiada Data", "warning");
+      alert("Tiada data untuk dimuat turun.");
       return;
     }
     
@@ -2990,9 +3045,9 @@ async function handleCredentialResponse(response) {
     URL.revokeObjectURL(url);
   }
 
-  async function downloadDashboardCSV() {
+  function downloadDashboardCSV() {
     if (!cachedData || cachedData.length === 0) {
-      await CustomAppModal.alert("Tiada data untuk dimuat turun.", "Tiada Data", "warning");
+      alert("Tiada data untuk dimuat turun.");
       return;
     }
     
@@ -3164,7 +3219,7 @@ async function handleCredentialResponse(response) {
       pdfUploadArea.classList.remove('dragover');
     });
 
-    pdfUploadArea.addEventListener('drop', async (e) => {
+    pdfUploadArea.addEventListener('drop', (e) => {
       e.preventDefault();
       pdfUploadArea.classList.remove('dragover');
       
@@ -3178,7 +3233,7 @@ async function handleCredentialResponse(response) {
           pdfFileInput.dispatchEvent(new Event('change', { bubbles: true }));
           updateFileName(file.name);
         } else {
-          await CustomAppModal.alert("Sila muat naik fail PDF sahaja.", "Ralat Format", "error");
+          alert("Sila muat naik fail PDF sahaja.");
         }
       }
     });
@@ -3256,10 +3311,10 @@ async function handleCredentialResponse(response) {
 
     try {
       if (typeof pdfjsLib !== 'undefined') {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.js';
       } else {
         console.error("V6.5.2 PDF.js library not loaded");
-        await CustomAppModal.alert("PDF processing library tidak dimuatkan. Sila muat semula halaman.", "Ralat Sistem", "error");
+        alert("PDF processing library tidak dimuatkan. Sila muat semula halaman.");
         return;
       }
 
@@ -3297,13 +3352,13 @@ async function handleCredentialResponse(response) {
 
   async function processPdfWithAI() {
     if (!pdfFileInput.files.length) {
-      await CustomAppModal.alert("Sila pilih fail PDF terlebih dahulu.", "Fail Diperlukan", "warning");
+      alert("Sila pilih fail PDF terlebih dahulu.");
       return;
     }
 
     const file = pdfFileInput.files[0];
     if (file.size > 10 * 1024 * 1024) {
-      await CustomAppModal.alert("Fail terlalu besar (Maks 10MB).", "Ralat Saiz", "error");
+      alert("Fail terlalu besar (Maks 10MB).");
       return;
     }
 
@@ -3338,7 +3393,7 @@ async function handleCredentialResponse(response) {
       updateProgress(5, "Membaca fail...");
       
       if (typeof pdfjsLib !== 'undefined') {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.js';
       } else {
         throw new Error("PDF.js library not loaded");
       }
@@ -3406,7 +3461,7 @@ async function handleCredentialResponse(response) {
       await playErrorSound();
 
       document.getElementById('pdfProgressMsg').innerHTML = `<span style="color:#ef4444; font-weight:bold;">Ralat: ${error.message}</span>`;
-      await CustomAppModal.alert("Gagal memproses: " + error.message, "Ralat Sistem", "error");
+      alert("Gagal memproses: " + error.message);
     }
   }
 
@@ -3890,7 +3945,7 @@ async function handleCredentialResponse(response) {
       profilePdfUploadArea.classList.remove('dragover');
     });
 
-    profilePdfUploadArea.addEventListener('drop', async (e) => {
+    profilePdfUploadArea.addEventListener('drop', (e) => {
       e.preventDefault();
       profilePdfUploadArea.classList.remove('dragover');
       
@@ -3904,7 +3959,7 @@ async function handleCredentialResponse(response) {
           profilePdfInput.dispatchEvent(new Event('change', { bubbles: true }));
           updateProfileFileName(file.name);
         } else {
-          await CustomAppModal.alert("Sila muat naik fail PDF sahaja.", "Ralat Format", "error");
+          alert("Sila muat naik fail PDF sahaja.");
         }
       }
     });
@@ -4045,13 +4100,13 @@ async function handleCredentialResponse(response) {
 
   async function processProfileWithAI() {
     if (!profilePdfInput.files.length) {
-      await CustomAppModal.alert("Sila pilih fail PDF terlebih dahulu.", "Fail Diperlukan", "warning");
+      alert("Sila pilih fail PDF terlebih dahulu.");
       return;
     }
 
     const file = profilePdfInput.files[0];
     if (file.size > 10 * 1024 * 1024) {
-      await CustomAppModal.alert("Fail terlalu besar (Maks 10MB).", "Ralat Saiz", "error");
+      alert("Fail terlalu besar (Maks 10MB).");
       return;
     }
 
@@ -4086,7 +4141,7 @@ async function handleCredentialResponse(response) {
       updateProgress(5, "Membaca fail...");
 
       if (typeof pdfjsLib !== 'undefined') {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.js';
       } else {
         throw new Error("PDF.js library not loaded");
       }
@@ -4156,7 +4211,7 @@ async function handleCredentialResponse(response) {
       await playErrorSound();
       
       document.getElementById('profilePdfProgressMsg').innerHTML = `<span style="color:#ef4444; font-weight:bold;">Ralat: ${error.message}</span>`;
-      await CustomAppModal.alert("Gagal memproses profile PDF: " + error.message, "Ralat Sistem", "error");
+      alert("Gagal memproses profile PDF: " + error.message);
     }
   }
 
@@ -4319,9 +4374,9 @@ async function handleCredentialResponse(response) {
     profilePdfExtractedData.innerHTML = html;
   }
 
-  async function applyProfileDataToForm() {
+  function applyProfileDataToForm() {
     if (!extractedProfileData) {
-      await CustomAppModal.alert("Tiada data profile untuk digunakan.", "Tiada Data", "warning");
+      alert("Tiada data profile untuk digunakan.");
       return;
     }
 
@@ -4410,7 +4465,7 @@ async function handleCredentialResponse(response) {
       profileWeb.value = extractedProfileData.webAddress;
     }
 
-    await CustomAppModal.alert("Data profile berjaya diisi ke borang!", "Berjaya", "success");
+    alert("Data profile berjaya diisi ke borang!");
   }
 
   function clearProfileData() {
@@ -4440,7 +4495,7 @@ async function handleCredentialResponse(response) {
   if (btnCetakProfile) {
     btnCetakProfile.addEventListener('click', async () => {
       if (!profileSyarikat.value.trim()) {
-        await CustomAppModal.alert("Sila isi Nama Syarikat terlebih dahulu sebelum mencetak.", "Maklumat Tidak Lengkap", "warning");
+        alert("Sila isi Nama Syarikat terlebih dahulu sebelum mencetak.");
         return;
       }
 
@@ -4598,19 +4653,31 @@ async function handleCredentialResponse(response) {
 
       // Log masuk semula ke Firebase secara automatik untuk SEMUA role
       if (currentUser && currentUser.email) {
-          authFirebase.signInAnonymously().then(() => {
+          authFirebase.signInAnonymously().then(function() {
+              console.log("Session restore: Firebase signInAnonymously berjaya.");
               // Khusus untuk Pengesyor (Sambung ke fungsi Bakul)
               if (currentUser.role === 'PENGESYOR') {
                   currentUserFirebaseCode = currentUser.firebaseCode || null; 
                   if (currentUserFirebaseCode) {
-                      dbFirestore.collection("users").doc(currentUserFirebaseCode).get().then(doc => {
+                      dbFirestore.collection("users").doc(currentUserFirebaseCode).get()
+                        .then(function(doc) {
                           if (doc.exists) {
                               firebaseUserRules = doc.data();
+                              console.log("Session restore: Peraturan Tapisan dimuatkan.");
                               subscribeToBakulFirebase();
+                          } else {
+                              console.error("Session restore: Dokumen Firebase users/" + currentUserFirebaseCode + " tidak wujud.");
                           }
-                      });
+                        })
+                        .catch(function(fbErr) {
+                          console.error("Session restore: Ralat Firestore get():", fbErr);
+                        });
+                  } else {
+                      console.warn("Session restore: PENGESYOR tanpa Firebase Code.");
                   }
               }
+          }).catch(function(authErr) {
+              console.error("Session restore: Ralat Firebase Auth:", authErr);
           });
       }
       setupUserUI(); 
@@ -5615,11 +5682,11 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
     });
   }
 
-  async function openDriveFolder() {
+  function openDriveFolder() {
     const dbPautan = document.getElementById('db_pautan')?.value;
     
     if (!dbPautan || dbPautan.trim() === '') {
-      await CustomAppModal.alert("Tiada pautan folder Drive. Sila cipta folder terlebih dahulu.", "Makluman", "warning");
+      alert("Tiada pautan folder Drive. Sila cipta folder terlebih dahulu.");
       return;
     }
     
@@ -5631,11 +5698,11 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
   }
 
   if (btnOpenMyDriveFolder) {
-    btnOpenMyDriveFolder.addEventListener('click', async () => {
+    btnOpenMyDriveFolder.addEventListener('click', () => {
       if (userFolderUrl) {
         window.open(userFolderUrl, '_blank');
       } else {
-        await CustomAppModal.alert("Folder user anda belum dicipta. Sila cipta folder untuk syarikat ini terlebih dahulu.", "Makluman", "warning");
+        alert("Folder user anda belum dicipta. Sila cipta folder untuk syarikat ini terlebih dahulu.");
       }
     });
   }
@@ -6358,6 +6425,13 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
     
     if (anonymousBadge) anonymousBadge.style.display = 'none';
     
+    var queueBtn = document.getElementById('btnQueueSPI');
+    if (queueBtn) {
+      var allowedRoles = ['ADMIN','PENGESYOR','PELULUS'];
+      var userRole = currentUser.role ? currentUser.role.toUpperCase().trim() : '';
+      queueBtn.style.display = allowedRoles.indexOf(userRole) > -1 ? '' : 'none';
+    }
+    
     // KEMASKINI: Pastikan fungsi klik YouTube dipasang setiap kali UI dimuatkan (termasuk selepas refresh)
     userBadge.innerText = `👤 ${currentUser.name} (${currentUser.role})`;
     userBadge.title = "Buka Portal YouTube";
@@ -6555,7 +6629,7 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
       switchTab(activeTab);
       
     } else {
-      await CustomAppModal.alert("Role pengguna tidak dikenali.", "Ralat Akses", "error");
+      alert("Role pengguna tidak dikenali.");
     }
 
     // --- KOD BARU (a): Masukkan elemen slider ke dalam container ---
@@ -8200,7 +8274,7 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
         if (item.borang_json && item.borang_json.trim() !== '') {
             const btnPrint = document.createElement('button');
             btnPrint.className = 'btn-sm';
-            btnPrint.style.backgroundColor = '#6366f1';
+            btnPrint.style.backgroundColor = '#2563eb';
             btnPrint.innerText = '🖨️ Cetak';
             
             // KOD BARU: Menggunakan processCetakBiasa berbanding processLihatBorangPreview
@@ -8243,7 +8317,7 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
         if (item.borang_json && item.borang_json.trim() !== '') {
             const btnPrint = document.createElement('button');
             btnPrint.className = 'btn-sm';
-            btnPrint.style.backgroundColor = '#6366f1';
+            btnPrint.style.backgroundColor = '#2563eb';
             btnPrint.innerText = '🖨️ Cetak';
             btnPrint.onclick = function() { processPelulusPrint(item); };
             btnContainer.appendChild(btnPrint);
@@ -8909,11 +8983,11 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
         
         if(statusEl) statusEl.innerText = errorMsg; 
         
-        setTimeout(async () => {
+        setTimeout(() => {
           if (loadingOverlay) {
             loadingOverlay.style.display = 'none';
           }
-          await CustomAppModal.alert("GAGAL menghantar data: " + errorMsg, "Ralat Penghantaran", "error");
+          alert("GAGAL menghantar data: " + errorMsg);
         }, 1000);
       });
     } else {
@@ -8949,7 +9023,7 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
         }
         if(callback) callback(result);
       })
-      .catch(async (err) => { 
+      .catch(err => { 
         clearTimeout(timeoutId);
         console.error("V6.5.2 Submit error:", err);
         
@@ -8961,7 +9035,7 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
         }
         
         if(statusEl) statusEl.innerText = errorMsg; 
-        await CustomAppModal.alert("GAGAL menghantar data: " + errorMsg, "Ralat Penghantaran", "error");
+        alert("GAGAL menghantar data: " + errorMsg);
       });
     }
   }
@@ -9946,18 +10020,11 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
 
               // 2. Fungsi Buang Personel
               const delBtn = div.querySelector('.qc-btn-delete');
-              delBtn.addEventListener('click', async () => {
-                  const isConfirmed = await CustomAppModal.confirm(
-                      "Adakah anda pasti mahu membuang personel ini?",
-                      "Buang Personel",
-                      "warning",
-                      "Ya, Buang",
-                      true
-                  );
-                  if (isConfirmed) {
-                      card.remove();
+              delBtn.addEventListener('click', () => {
+                  if (confirm("Adakah anda pasti mahu membuang personel ini?")) {
+                      card.remove(); // Buang kotak di borang asal
                       saveFormData();
-                      openQuickCheckModal();
+                      openQuickCheckModal(); // Refresh modal
                   }
               });
               
@@ -10198,13 +10265,13 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
       return dateStr;
   }
 
-  document.addEventListener('change', async (e) => {
+  document.addEventListener('change', (e) => {
       // UPLOAD EXCEL
       if (e.target.id === 'excelFileInput') {
           
           // KEMASKINI 1: Sekat upload jika data tapisan (rules) belum siap di-load dari Firebase
           if (currentUser && currentUser.role === 'PENGESYOR' && !firebaseUserRules) {
-              await CustomAppModal.alert("Sistem sedang mendapatkan peraturan tapisan peribadi anda. Sila tunggu 2-3 saat dan klik 'Pilih Fail Excel' sekali lagi.", "Makluman", "info");
+              alert("⏳ Sistem sedang mendapatkan peraturan tapisan peribadi anda. Sila tunggu 2-3 saat dan klik 'Pilih Fail Excel' sekali lagi.");
               e.target.value = ''; 
               return;
           }
@@ -10218,14 +10285,14 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
           simulateLoadingWithSteps(['Membaca fail Excel...', 'Menapis data berdasarkan ketetapan anda...'], 'Sila Tunggu');
           
           const reader = new FileReader();
-          reader.onload = async (evt) => {
+          reader.onload = (evt) => {
               try {
                   const data = new Uint8Array(evt.target.result);
                   const workbook = XLSX.read(data, { type: 'array' });
                   const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1 });
                   processExcelForTapisan(jsonData);
               } catch (error) {
-                  await CustomAppModal.alert("Ralat membaca fail Excel. Pastikan ia format .xlsx yang betul.", "Ralat", "error");
+                  alert("Ralat membaca fail Excel. Pastikan ia format .xlsx yang betul.");
               } finally {
                   hideLoading();
                   e.target.value = ''; 
@@ -10240,7 +10307,7 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
       }
   });
 
-  async function processExcelForTapisan(rawData) {
+  function processExcelForTapisan(rawData) {
       if (rawData.length < 2) return;
       const headers = rawData[0].map(h => String(h).toLowerCase().trim());
       
@@ -10257,7 +10324,7 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
       };
 
       if (keys.company === -1 || keys.grade === -1 || keys.cidb === -1) {
-          await CustomAppModal.alert("Format Excel tidak sah. Mesti ada kolum Syarikat, Gred, dan Reg. No/CIDB.", "Ralat Format", "error");
+          CustomAppModal.alert("Format Excel tidak sah. Mesti ada kolum Syarikat, Gred, dan Reg. No/CIDB.", "Ralat Format", "error");
           return;
       }
 
@@ -10733,7 +10800,7 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
                       playSoundEffect('positive_chime.mp3');
                   } catch(err) {
                       console.error("Gagal padam:", err);
-                      await CustomAppModal.alert("Gagal memadam permohonan dari bakul Firebase.", "Ralat", "error");
+                      CustomAppModal.alert("Gagal memadam permohonan dari bakul Firebase.", "Ralat", "error");
                   }
               }
           } else if (prosesBtn) {
@@ -10862,7 +10929,7 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
           // 2. Masukkan UI loading peratusan custom secara terus ke dalam table body
           const loadingUI = `
               <tr>
-                  <td colspan="4" style="text-align:center; padding: 40px 20px;">
+                  <td colspan="6" style="text-align:center; padding: 40px 20px;">
                       <div style="display:flex; flex-direction:column; align-items:center; gap:15px;">
                           <div class="dashboard-spinner" style="margin-bottom:0;"></div>
                           <div class="queue-loading-text" style="font-weight:bold; color:#1e40af; font-size:1rem;">Menyambung ke pelayan... 0%</div>
@@ -10900,7 +10967,9 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
           try {
               // 4. Minta data dari pelayan (Google Apps Script)
               const userEmail = currentUser ? encodeURIComponent(currentUser.email) : '';
-              const response = await fetchWithRetry(SCRIPT_URL + `?action=getQueueData&email=${userEmail}&t=` + Date.now(), { method: 'GET' }, 3, 1000);
+              const userRole = currentUser ? encodeURIComponent(currentUser.role) : '';
+              const userName = currentUser ? encodeURIComponent(currentUser.name) : '';
+              const response = await fetchWithRetry(SCRIPT_URL + `?action=getQueueData&email=${userEmail}&role=${userRole}&userName=${userName}&t=` + Date.now(), { method: 'GET' }, 3, 1000);
               const result = await response.json();
 
               // Hentikan animasi tiruan
@@ -10921,7 +10990,7 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
 
                       await playSuccessSound();
                   } else {
-                      await CustomAppModal.alert('Gagal mendapatkan senarai queue.', 'Ralat', 'error');
+                      CustomAppModal.alert('Gagal mendapatkan senarai queue.', 'Ralat', 'error');
                       queueSpiModal.classList.remove('show');
                       setTimeout(() => queueSpiModal.style.display = 'none', 300);
                   }
@@ -10929,7 +10998,7 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
 
           } catch (error) {
               clearInterval(progressInterval);
-              await CustomAppModal.alert('Gagal mendapatkan senarai queue: ' + error.message, 'Ralat', 'error');
+              CustomAppModal.alert('Gagal mendapatkan senarai queue: ' + error.message, 'Ralat', 'error');
               queueSpiModal.classList.remove('show');
               setTimeout(() => queueSpiModal.style.display = 'none', 300);
           }
@@ -10957,20 +11026,24 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
       if (!tbody) return;
       
       if (!dataArray || dataArray.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:15px; color:#64748b;">✅ Tiada permohonan dalam queue ini</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:15px; color:#64748b;">✅ Tiada permohonan dalam queue ini</td></tr>`;
           return;
       }
       
       tbody.innerHTML = dataArray.map((item, index) => {
-          // KOD BARU: Gunakan pelulus jika ada (untuk pemutihan), jika tiada kekalkan pengesyor (untuk siasatan biasa)
           const pegawai = item.pelulus || item.pengesyor || '-';
+          const tarikh = item.date_submit || '-';
+          var just = item.justifikasi || '';
+          var justDisplay = just.length > 60 ? just.substring(0, 60) + '…' : just;
           
           return `
           <tr style="border-bottom: 1px solid #f1f5f9;">
               <td style="text-align:center;">${index + 1}</td>
               <td style="font-weight:bold; color: #1e293b;">${item.syarikat}</td>
               <td style="text-align:center; color: #475569;">${item.cidb}</td>
+              <td style="text-align:center; font-size: 0.85rem;">${tarikh}</td>
               <td style="text-align:center; font-size: 0.85rem;">${pegawai}</td>
+              <td style="font-size: 0.8rem; color: #475569; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${just.replace(/"/g,'&quot;')}">${justDisplay}</td>
           </tr>
           `;
       }).join('');
@@ -11107,11 +11180,11 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
                   }
               }
           } else {
-              await CustomAppModal.alert("Gagal cari video: " + result.message, "Ralat", "error");
+              CustomAppModal.alert("Gagal cari video: " + result.message, "Ralat", "error");
           }
       } catch (error) {
           hideLoading();
-          await CustomAppModal.alert("Ralat sistem: " + error.message, "Ralat", "error");
+          CustomAppModal.alert("Ralat sistem: " + error.message, "Ralat", "error");
       }
   }
   function displayYoutubeResults(items) {
@@ -11408,7 +11481,7 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
           await CustomAppModal.alert("Gagal memproses cetakan: " + e.message, "Ralat", "error");
       }
   }
-  async function processCetakBiasa(item) {
+  function processCetakBiasa(item) {
       if (!item.borang_json) return;
       try {
           const parsedData = JSON.parse(item.borang_json);
@@ -11516,11 +11589,11 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
 
       } catch(e) {
           console.error(e);
-          await CustomAppModal.alert("Gagal mencetak borang: " + e.message, "Ralat", "error"); 
+          CustomAppModal.alert("Gagal mencetak borang: " + e.message, "Ralat", "error"); 
       }
   }
 
-  async function processLihatBorangPreview(item) {
+  function processLihatBorangPreview(item) {
       if (!item.borang_json) return;
       try {
           const parsedData = JSON.parse(item.borang_json);
@@ -11704,7 +11777,7 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
           newWin.document.close();
       } catch(e) {
           console.error(e);
-          await CustomAppModal.alert("Gagal memaparkan borang: " + e.message, "Ralat", "error"); 
+          CustomAppModal.alert("Gagal memaparkan borang: " + e.message, "Ralat", "error"); 
       }
   }
 
