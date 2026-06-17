@@ -219,6 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (fileName === 'ui_click.mp3') fileName = 'audio/ui click.mp3';
       else if (fileName === 'positive_chime.mp3') fileName = 'audio/positive chime.mp3';
       else if (fileName === 'error_buzz.mp3') fileName = 'audio/error buzz.mp3';
+      else if (fileName === 'minimal_alert.mp3') fileName = 'audio/minimal alert.mp3';
       else if (!fileName.includes('/')) fileName = 'audio/' + fileName;
 
       const sfx = new Audio(fileName);
@@ -6656,12 +6657,14 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
 
   function showLoginGreeting() {
     const name = currentUser?.name || 'Pengguna';
+    playSoundEffect('positive_chime.mp3');
     setTimeout(() => {
       CustomAppModal.alert(`${name}, ${getDailyGreeting('login')}`, 'Selamat Datang!', 'success');
     }, 800);
   }
 
   function showLogoutGreeting() {
+    playSoundEffect('minimal_alert.mp3');
     CustomAppModal.alert(getDailyGreeting('logout'), 'Selamat Tinggal...', 'info');
   }
 
