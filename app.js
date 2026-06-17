@@ -277,9 +277,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================================================
   // MOBILE MENU LOGIC
   // =========================================================================
+  const appSidebar = document.querySelector('.app-sidebar');
+  
   function closeMobileMenu() {
-    if (tabsContainer) {
-      tabsContainer.classList.remove('show-menu');
+    if (appSidebar) {
+      appSidebar.classList.remove('show-menu');
     }
     if (menuOverlay) {
       menuOverlay.classList.remove('show');
@@ -288,8 +290,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function openMobileMenu() {
-    if (tabsContainer) {
-      tabsContainer.classList.add('show-menu');
+    if (appSidebar) {
+      appSidebar.classList.add('show-menu');
     }
     if (menuOverlay) {
       menuOverlay.classList.add('show');
@@ -298,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function toggleMobileMenu() {
-    if (tabsContainer && tabsContainer.classList.contains('show-menu')) {
+    if (appSidebar && appSidebar.classList.contains('show-menu')) {
       closeMobileMenu();
     } else {
       openMobileMenu();
@@ -6442,6 +6444,14 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
         switchTab('youtube');
     };
     
+    // --- KOD BARU: Update sidebar user info ---
+    const sidebarUserName = document.getElementById('sidebarUserName');
+    const sidebarUserRole = document.getElementById('sidebarUserRole');
+    const sidebarUserAvatar = document.querySelector('.sidebar-user-avatar');
+    if (sidebarUserName) sidebarUserName.textContent = currentUser.name;
+    if (sidebarUserRole) sidebarUserRole.textContent = currentUser.role;
+    if (sidebarUserAvatar) sidebarUserAvatar.textContent = `👤`;
+    
     let themeColor = getUserColorHex(currentUser.color);
     
     // --- KOD TAMBAHAN: Terapkan warna pengguna ke seluruh sistem & cetakan ---
@@ -7516,6 +7526,19 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
   const btnLogoutTop = document.getElementById('btnLogoutTop');
   if (btnLogoutTop) {
     btnLogoutTop.addEventListener('click', async () => {
+      await handleLogout();
+    });
+  }
+  
+  // Sidebar logout button
+  const btnLogoutSidebar = document.getElementById('btnLogoutSidebar');
+  if (btnLogoutSidebar) {
+    btnLogoutSidebar.addEventListener('click', async () => {
+      await handleLogout();
+    });
+  }
+  
+  async function handleLogout() {
       // PENGGUNAAN MODAL BARU
       const isConfirmed = await CustomAppModal.confirm(
           "Adakah anda pasti mahu log keluar dari sistem?", 
@@ -7534,7 +7557,6 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
         ]);
         location.reload();
       }
-    });
   }
 
   const btnResetTab1 = document.getElementById('btnResetTab1');

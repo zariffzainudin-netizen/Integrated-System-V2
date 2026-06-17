@@ -1,32 +1,188 @@
 :root {
             --theme-color: #2563eb;
+            --theme-light: #3b82f6;
+            --theme-dark: #1d4ed8;
+            --theme-bg: #eff6ff;
+            
             --glass-bg: rgba(255, 255, 255, 0.96);
             --glass-border: 1px solid rgba(255, 255, 255, 0.7);
+            
             --success-color: #10b981;
             --warning-color: #f59e0b;
             --danger-color: #ef4444;
             --music-color: #8b5cf6;
             --sfx-color: #f97316;
+            
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+            --bg-page: #f1f5f9;
+            --bg-card: #ffffff;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            
+            --sidebar-width: 260px;
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        /* ========== SIDEBAR LAYOUT ========== */
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar-header {
+            padding: var(--space-md) var(--space-md) 0 var(--space-md);
+            margin-bottom: var(--space-sm);
+        }
+        
+        .sidebar-logo {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .sidebar-logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--theme-color);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        
+        .sidebar-subtitle {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-top: 2px;
+            padding-left: 40px;
+        }
+        
+        .sidebar-divider {
+            height: 1px;
+            background: var(--border);
+            margin: var(--space-sm) var(--space-md);
+        }
+
+        .sidebar-footer {
+            padding: var(--space-sm) var(--space-md) var(--space-md);
+            border-top: 1px solid var(--border);
+            margin-top: auto;
+        }
+        
+        .sidebar-user {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .sidebar-user:hover {
+            background: var(--theme-bg);
+        }
+        
+        .sidebar-user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--theme-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            color: var(--theme-color);
+            flex-shrink: 0;
+        }
+        
+        .sidebar-user-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .sidebar-user-name {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .sidebar-user-role {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .sidebar-user-logout {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        
+        .sidebar-user-logout:hover {
+            background: #fef2f2;
+            border-color: var(--danger-color);
+            color: var(--danger-color);
         }
 
         body {
             font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 0;
             width: 100%;
             overflow-x: hidden;
-            color: #333;
-            background: #0a1628;
+            color: var(--text-primary);
+            background: var(--bg-page);
             min-height: 100vh;
             position: relative;
             box-sizing: border-box;
         }
 
-        /* App background - visible after login when landing is hidden */
-        body:has(#app-container[style*="display: block"]) {
+        /* Animated gradient for main content area */
+        .main-content {
             background: linear-gradient(-45deg, #10b981, #facc15, #3b82f6, #2563eb);
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
+            min-height: 100vh;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         @keyframes gradientBG {
@@ -1035,17 +1191,33 @@
 
         #app-container {
             position: relative;
-            padding-top: 45px;
+            min-height: 100vh;
+            padding-left: var(--sidebar-width);
+        }
+
+        /* Sidebar wrapper inside app-container */
+        .app-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: white;
+            border-right: 1px solid var(--border);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.04);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: var(--space-lg);
+            max-width: 100%;
         }
 
         .top-controls {
-            position: absolute;
-            top: 0;
-            right: 0;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            z-index: 100;
+            display: none;
         }
 
         .user-badge {
@@ -1245,81 +1417,69 @@
 
         .tabs {
             display: flex;
-            justify-content: center;
-            width: fit-content;
-            margin: 0 auto 20px auto;
-            background: rgba(255, 255, 255, 0.7); /* Diterangkan sedikit supaya jelas bila scroll */
-            backdrop-filter: blur(12px);          /* KOD BARU: Efek kaca kabur bila scroll */
-            -webkit-backdrop-filter: blur(12px);  /* KOD BARU: Sokongan untuk browser Safari/Apple */
-            border-radius: 12px;
-            padding: 5px;
-            border: var(--glass-border);
-            flex-wrap: wrap;
-            
-            /* --- KOD BARU UNTUK JADIKAN IA MELEKAT (STICKY) --- */
-            position: sticky; 
-            top: 15px;      /* Jarak dari atas skrin bila ia mula melekat */
-            z-index: 1000;  /* Pastikan menu sentiasa berada di atas elemen (card) lain */
-            /* -------------------------------------------------- */
+            flex-direction: column;
+            width: var(--sidebar-width);
+            background: white;
+            border-right: 1px solid var(--border);
+            padding: var(--space-sm);
+            gap: 2px;
+            flex: 1;
+            overflow-y: auto;
         }
 
-        /* KOD BARU: Latar Belakang (Slider) */
         .tab-slider {
-            position: absolute;
-            background-color: var(--theme-color);
-            border-radius: 8px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 1;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            left: 0;
-            top: 0;
-            width: 0;
-            height: 0;
+            display: none;
         }
 
         .tab-btn {
             display: flex;
             align-items: center;
-            justify-content: center;
-            padding: 10px 15px;
+            gap: var(--space-sm);
+            width: 100%;
+            padding: 10px 12px;
             cursor: pointer;
             border: none;
-            background: transparent !important; 
-            color: #444;
-            border-radius: 8px;
-            transition: color 0.3s, gap 0.3s ease;
+            background: transparent;
+            color: var(--text-secondary);
+            border-radius: var(--radius-md);
+            transition: all 0.15s ease;
             white-space: nowrap;
-            position: relative; 
-            z-index: 2; 
-            gap: 0; 
-            /* Pastikan kod 'flex: 1;' dibuang dari sini supaya butang tidak memanjang */
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-align: left;
+            position: relative;
         }
 
-        /* KOD BARU: Asingkan saiz ikon dan sembunyikan teks */
+        .tab-btn:hover {
+            background: var(--theme-bg);
+            color: var(--theme-color);
+        }
+
+        .tab-btn.active {
+            background: var(--theme-bg);
+            color: var(--theme-color);
+            font-weight: 600;
+            box-shadow: inset 3px 0 0 var(--theme-color);
+        }
+
         .tab-icon {
-            font-size: 1.2rem;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1rem;
             line-height: 1;
         }
 
         .tab-text {
-            max-width: 0;
-            opacity: 0;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-
-        /* KOD BARU: Tunjuk teks dan wujudkan jarak bila aktif */
-        .tab-btn.active {
-            color: white !important; 
-            box-shadow: none !important;
-            gap: 8px; 
-        }
-
-        .tab-btn.active .tab-text {
-            max-width: 200px;
+            font-size: 0.85rem;
+            font-weight: 500;
             opacity: 1;
+            max-width: none;
+            overflow: visible;
+            transition: none;
         }
 
         @keyframes fadeIn {
@@ -1587,37 +1747,36 @@
                 display: flex;
             }
 
-            #tabs-container {
+            #app-container {
+                padding-left: 0;
+                padding-top: 0;
+            }
+
+            .app-sidebar {
                 position: fixed;
                 top: 0;
                 left: -100%;
                 width: 260px;
                 height: 100vh;
-                flex-direction: column;
                 z-index: 3000;
                 transition: left 0.3s ease;
-                background: rgba(255, 255, 255, 0.98);
-                backdrop-filter: blur(20px);
-                padding: 25px 15px;
+                background: white;
+                border-right: 1px solid var(--border);
+                padding: 0;
                 border-radius: 0 16px 16px 0;
                 box-shadow: 8px 0 30px rgba(0,0,0,0.3);
-                flex-wrap: nowrap;
-                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
             }
 
-            #tabs-container.show-menu {
+            .app-sidebar.show-menu {
                 left: 0;
             }
 
             .tab-btn {
-                width: 100%;
-                text-align: left;
                 padding: 14px 18px;
-                border-radius: 10px;
                 margin-bottom: 5px;
                 font-size: 1rem;
-                justify-content: flex-start;
-                flex: none;
             }
 
             .top-controls {
