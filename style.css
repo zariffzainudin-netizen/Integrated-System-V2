@@ -38,107 +38,184 @@
             display: flex;
             min-height: 100vh;
         }
-        
-        .sidebar-header {
-            padding: var(--space-md) var(--space-md) 0 var(--space-md);
-            margin-bottom: var(--space-sm);
+
+        .app-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: white;
+            border-right: 1px solid var(--border);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
         }
-        
+
+        .sidebar-header {
+            padding: var(--space-md) var(--space-md) 0;
+        }
+
         .sidebar-logo {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: 800;
             color: var(--text-primary);
-            letter-spacing: -0.3px;
             display: flex;
             align-items: center;
-            gap: var(--space-sm);
+            gap: 10px;
         }
-        
+
         .sidebar-logo-icon {
-            width: 32px;
-            height: 32px;
+            width: 30px;
+            height: 30px;
             background: var(--theme-color);
             border-radius: var(--radius-md);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 700;
             flex-shrink: 0;
         }
-        
+
         .sidebar-subtitle {
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             color: var(--text-muted);
             font-weight: 500;
-            margin-top: 2px;
+            letter-spacing: 0.3px;
             padding-left: 40px;
+            margin-top: 1px;
         }
-        
+
         .sidebar-divider {
             height: 1px;
             background: var(--border);
-            margin: var(--space-sm) var(--space-md);
+            margin: 10px var(--space-md);
         }
 
-        .sidebar-footer {
-            padding: var(--space-sm) var(--space-md) var(--space-md);
-            border-top: 1px solid var(--border);
-            margin-top: auto;
+        /* NAVIGATION TABS - scrollable, footer stays visible below */
+        #tabs-container.tabs {
+            display: flex;
+            flex-direction: column;
+            padding: 4px var(--space-sm);
+            gap: 1px;
+            flex: 1;
+            overflow-y: auto;
+            min-height: 0;
         }
-        
+
+        .tab-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 8px 10px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            border-radius: 6px;
+            transition: background 0.12s;
+            white-space: nowrap;
+            font-size: 0.82rem;
+            font-weight: 500;
+            text-align: left;
+            position: relative;
+        }
+
+        .tab-btn:hover {
+            background: #f1f5f9;
+        }
+
+        .tab-btn.active {
+            background: #eff6ff;
+            color: var(--theme-color);
+            font-weight: 600;
+            box-shadow: inset 3px 0 0 var(--theme-color);
+        }
+
+        .tab-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .tab-icon svg {
+            display: block;
+        }
+
+        .tab-text {
+            font-size: 0.82rem;
+            font-weight: 500;
+        }
+
+        /* SIDEBAR FOOTER - ALWAYS VISIBLE */
+        .sidebar-footer {
+            padding: var(--space-sm) var(--space-md);
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
         .sidebar-user {
             display: flex;
             align-items: center;
-            gap: var(--space-sm);
-            padding: var(--space-sm);
+            gap: 10px;
+            padding: 6px 8px;
             border-radius: var(--radius-md);
             cursor: pointer;
-            transition: background 0.2s;
+            transition: background 0.15s;
         }
-        
+
         .sidebar-user:hover {
-            background: var(--theme-bg);
+            background: #f8fafc;
         }
-        
+
         .sidebar-user-avatar {
-            width: 32px;
-            height: 32px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             background: var(--theme-bg);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.9rem;
             color: var(--theme-color);
             flex-shrink: 0;
         }
-        
+
+        .sidebar-user-avatar svg {
+            width: 16px;
+            height: 16px;
+            display: block;
+        }
+
         .sidebar-user-info {
             flex: 1;
             min-width: 0;
         }
-        
+
         .sidebar-user-name {
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             font-weight: 600;
             color: var(--text-primary);
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-        
+
         .sidebar-user-role {
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        
+
         .sidebar-user-logout {
-            width: 28px;
-            height: 28px;
+            width: 26px;
+            height: 26px;
             border-radius: 6px;
             border: 1px solid var(--border);
             background: transparent;
@@ -147,15 +224,20 @@
             align-items: center;
             justify-content: center;
             color: var(--text-muted);
-            font-size: 0.8rem;
-            transition: all 0.2s;
+            font-size: 0.75rem;
+            transition: all 0.15s;
             flex-shrink: 0;
         }
-        
+
         .sidebar-user-logout:hover {
             background: #fef2f2;
-            border-color: var(--danger-color);
+            border-color: #fecaca;
             color: var(--danger-color);
+        }
+
+        /* Tab slider for legacy support */
+        .tab-slider {
+            display: none;
         }
 
         body {
@@ -177,12 +259,6 @@
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
             min-height: 100vh;
-        }
-
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
         }
 
         @keyframes gradientBG {
@@ -1413,73 +1489,6 @@
             background: var(--theme-color);
             color: white;
             transform: scale(1.02);
-        }
-
-        .tabs {
-            display: flex;
-            flex-direction: column;
-            width: var(--sidebar-width);
-            background: white;
-            border-right: 1px solid var(--border);
-            padding: var(--space-sm);
-            gap: 2px;
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        .tab-slider {
-            display: none;
-        }
-
-        .tab-btn {
-            display: flex;
-            align-items: center;
-            gap: var(--space-sm);
-            width: 100%;
-            padding: 10px 12px;
-            cursor: pointer;
-            border: none;
-            background: transparent;
-            color: var(--text-secondary);
-            border-radius: var(--radius-md);
-            transition: all 0.15s ease;
-            white-space: nowrap;
-            font-size: 0.85rem;
-            font-weight: 500;
-            text-align: left;
-            position: relative;
-        }
-
-        .tab-btn:hover {
-            background: var(--theme-bg);
-            color: var(--theme-color);
-        }
-
-        .tab-btn.active {
-            background: var(--theme-bg);
-            color: var(--theme-color);
-            font-weight: 600;
-            box-shadow: inset 3px 0 0 var(--theme-color);
-        }
-
-        .tab-icon {
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            font-size: 1rem;
-            line-height: 1;
-        }
-
-        .tab-text {
-            font-size: 0.85rem;
-            font-weight: 500;
-            opacity: 1;
-            max-width: none;
-            overflow: visible;
-            transition: none;
         }
 
         @keyframes fadeIn {
