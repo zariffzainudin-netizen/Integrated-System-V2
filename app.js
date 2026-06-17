@@ -6494,6 +6494,90 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
     document.documentElement.style.setProperty('--gradient-3', darkenColor(themeColor, 10));
     document.documentElement.style.setProperty('--gradient-4', darkenColor(themeColor, 30));
     
+    // --- KOD BARU: Inisialisasi toggle sidebar & dark mode ---
+    function initToggles() {
+        const toggleDark = document.getElementById('toggleDarkMode');
+        const togglePin = document.getElementById('toggleSidebarPin');
+        const desktopMenuBtn = document.getElementById('desktopMenuBtn');
+        
+        // Load preferences
+        const savedDark = localStorage.getItem('stb_dark_mode');
+        const savedPin = localStorage.getItem('stb_sidebar_pinned');
+        
+        // Apply dark mode
+        if (savedDark === 'true') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            if (toggleDark) toggleDark.textContent = '☀️';
+        } else {
+            document.documentElement.removeAttribute('data-theme');
+            if (toggleDark) toggleDark.textContent = '🌙';
+        }
+        
+        // Apply sidebar pin
+        const appLayout = document.querySelector('.app-layout');
+        if (savedPin === 'false' && window.innerWidth > 768) {
+            appLayout.classList.add('sidebar-unpinned');
+            if (togglePin) togglePin.textContent = '🔓';
+        } else {
+            if (togglePin) togglePin.textContent = '📌';
+        }
+        
+        // Dark mode toggle
+        if (toggleDark) {
+            toggleDark.addEventListener('click', () => {
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                if (isDark) {
+                    document.documentElement.removeAttribute('data-theme');
+                    toggleDark.textContent = '🌙';
+                    localStorage.setItem('stb_dark_mode', 'false');
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    toggleDark.textContent = '☀️';
+                    localStorage.setItem('stb_dark_mode', 'true');
+                }
+            });
+        }
+        
+        // Sidebar pin toggle
+        if (togglePin) {
+            togglePin.addEventListener('click', () => {
+                const isPinned = !appLayout.classList.contains('sidebar-unpinned');
+                if (isPinned) {
+                    appLayout.classList.add('sidebar-unpinned');
+                    togglePin.textContent = '🔓';
+                    localStorage.setItem('stb_sidebar_pinned', 'false');
+                } else {
+                    appLayout.classList.remove('sidebar-unpinned');
+                    togglePin.textContent = '📌';
+                    localStorage.setItem('stb_sidebar_pinned', 'true');
+                }
+            });
+        }
+        
+        // Desktop hamburger opens sidebar
+        if (desktopMenuBtn) {
+            desktopMenuBtn.addEventListener('click', () => {
+                const sidebar = document.querySelector('.app-sidebar');
+                if (sidebar) {
+                    sidebar.classList.toggle('show-menu');
+                    const overlay = document.getElementById('menuOverlay');
+                    if (overlay) overlay.classList.toggle('show');
+                }
+            });
+        }
+        
+        // Close sidebar when clicking overlay
+        const overlay = document.getElementById('menuOverlay');
+        if (overlay) {
+            overlay.addEventListener('click', () => {
+                document.querySelector('.app-sidebar')?.classList.remove('show-menu');
+                overlay.classList.remove('show');
+            });
+        }
+    }
+    initToggles();
+    // --- Tamat ---
+    
     // Inisialkan aplikasi berdasarkan peranan
     if (!isAppReady) {
       initAppBasedOnRole();
