@@ -6466,8 +6466,17 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
     
     let themeColor = getUserColorHex(currentUser.color);
     
-    // --- KOD TAMBAHAN: Terapkan warna pengguna ke seluruh sistem & cetakan ---
+    // Terapkan warna tema ke seluruh sistem
     document.documentElement.style.setProperty('--theme-color', themeColor);
+    
+    // Sidebar background: tint 5% dari warna tema
+    function hexToRgba(hex, alpha) {
+        const r = parseInt(hex.slice(1,3), 16);
+        const g = parseInt(hex.slice(3,5), 16);
+        const b = parseInt(hex.slice(5,7), 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+    document.documentElement.style.setProperty('--sidebar-bg', hexToRgba(themeColor, 0.04));
     
     // Inisialkan aplikasi berdasarkan peranan
     if (!isAppReady) {

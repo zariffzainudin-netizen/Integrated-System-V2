@@ -45,7 +45,7 @@
             left: 0;
             width: var(--sidebar-width);
             height: 100vh;
-            background: white;
+            background: var(--sidebar-bg, white);
             border-right: 1px solid var(--border);
             z-index: 1000;
             display: flex;
@@ -278,11 +278,17 @@
         /* MOBILE HEADER & MENU */
         .mobile-header {
             display: none;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 15px;
-            position: relative;
-            z-index: 2500;
+            position: fixed;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 3000;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+
+        .mobile-header:hover {
+            opacity: 1;
         }
 
         #mobileMenuBtn {
@@ -1466,9 +1472,9 @@
         }
 
         .btn-top-fullview {
-            position: absolute;
-            top: 0;
-            left: 0;
+            position: fixed;
+            top: 10px;
+            left: calc(var(--sidebar-width) + 10px);
             background: rgba(255,255,255,0.9);
             border: 2px solid white;
             border-radius: 30px;
@@ -1758,7 +1764,7 @@
 
             #app-container {
                 padding-left: 0;
-                padding-top: 0;
+                padding-top: 70px;
             }
 
             .app-sidebar {
@@ -1796,8 +1802,12 @@
             }
 
             .btn-top-fullview {
-                position: static;
-                margin-bottom: 10px;
+                position: fixed;
+                top: auto;
+                bottom: 20px;
+                right: 20px;
+                left: auto;
+                margin-bottom: 0;
                 width: fit-content;
             }
 
