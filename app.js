@@ -5016,6 +5016,9 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
         border: none;
         padding: 10px;
         margin-top: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
       }
       
       .ver-title {
@@ -5033,7 +5036,9 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
       }
       
       .pengesyor-grid-new {
-        display: block;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
         margin-top: 10px;
       }
       
