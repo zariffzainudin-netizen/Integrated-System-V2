@@ -582,7 +582,7 @@ function handleUpdateRecord(data, sheet) {
         data.lawatan_submit_sptb !== undefined ? data.lawatan_submit_sptb : rlaw[1],
         data.lawatan_syor !== undefined ? data.lawatan_syor : rlaw[2],
         data.alamat_perniagaan !== undefined ? data.alamat_perniagaan : rlaw[3],
-        data.jenis_konsultansi !== undefined && data.jenis_konsultansi !== '' ? data.jenis_konsultansi : rlaw[4],
+        data.jenis_konsultansi !== undefined ? data.jenis_konsultansi : rlaw[4],
         data.alasan !== undefined ? data.alasan : rlaw[5],
         data.kelulusan !== undefined ? data.kelulusan : rlaw[6]
       ]]);
