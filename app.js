@@ -5018,8 +5018,7 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
         margin-top: 10px;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
-        overflow: hidden;
+        height: auto !important;
         page-break-inside: avoid;
         break-inside: avoid;
       }
