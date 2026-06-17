@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let bakulUnsubscribe = null;
 
   // URL APPSCRIPT
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxMS2D41UOvNFozdwHig67_4SN6BwCMS4iwnyPzN2_tbWB654lH0Udekv0pwWik7K58/exec';
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwswltGineFpg9BurQRgxsqjUGSFKHQBFAlz_h7Ptnx2wO4OEj98elG_nf3lkv7hCSN/exec';
   
   // Google Client ID
   const GOOGLE_CLIENT_ID = '758579492428-rnfev1nkkf2e6qduhujgtfbhudl2j9td.apps.googleusercontent.com';
@@ -4915,6 +4915,8 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
         height: 6px;
         background-color: ${themeColor};
         margin-bottom: 10px;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
       }
       
       .jenis-permohonan-bar {
@@ -4962,6 +4964,8 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
         background-color: ${themeColor};
         color: white;
         padding: 8px;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
       }
       
       .grade-bar {
@@ -5203,19 +5207,7 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
         
         const userColorHex = getUserColorHex(currentUser.color);
         const pdfCss = generatePdfCssString(userColorHex);
-        // Simpan status asal display untuk dikembalikan semula nanti
-        const imgEls = [
-            document.getElementById('print_pengesyor_sign'), document.getElementById('print_pengesyor_cop'),
-            document.getElementById('print_pelulus_sign'), document.getElementById('print_pelulus_cop')
-        ];
-        const originalDisplays = imgEls.map(el => el ? el.style.display : 'none');
-
-        // Sembunyikan gambar khusus untuk capture HTML ke Drive
-        imgEls.forEach(el => { if(el) el.style.display = 'none'; });
         const printHTMLForDrive = `<style>${pdfCss}</style>${printLayoutElement.outerHTML}`;
-
-        // Tunjukkan semula gambar untuk cetakan browser (window.print)
-        imgEls.forEach((el, idx) => { if(el) el.style.display = originalDisplays[idx]; });
         
         // Gunakan printHTMLForDrive dalam payload ke backend
         
@@ -11407,18 +11399,9 @@ Sila semak sistem STB untuk tindakan selanjutnya.`;
           }
           
           if (proceedToDrive) {
-              const imgEls = [
-                  document.getElementById('print_pengesyor_sign'), document.getElementById('print_pengesyor_cop'),
-                  document.getElementById('print_pelulus_sign'), document.getElementById('print_pelulus_cop')
-              ];
-              const originalDisplays = imgEls.map(el => el ? el.style.display : 'none');
-              imgEls.forEach(el => { if(el) el.style.display = 'none'; });
-              
               const printLayoutElement = document.getElementById('printLayout');
               const pdfCss = generatePdfCssString(userColorHex);
               const printHTMLForDrive = `<style>${pdfCss}</style>${printLayoutElement.outerHTML}`;
-              
-              imgEls.forEach((el, idx) => { if(el) el.style.display = originalDisplays[idx]; });
               
               // KOD BARU: Tentukan jenis perubahan yang tepat
               let specificType = '';
